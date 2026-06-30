@@ -180,26 +180,34 @@
         .btn-danger { background: #e74c3c; color: white; }
         .btn-warning { background: #f39c12; color: white; }
         .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-outline { background: transparent; border: 2px solid #4a90d9; color: #4a90d9; }
+        .btn-outline:hover { background: #4a90d9; color: white; }
         
-        /* === GRILLE PRODUITS POS === */
+        /* === GRILLE PRODUITS === */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
         }
         .product-card {
             background: white;
-            border-radius: 10px;
-            padding: 12px;
+            border-radius: 12px;
+            padding: 14px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             cursor: pointer;
             text-align: center;
             border: 2px solid transparent;
             transition: all 0.2s;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .product-card:hover {
             border-color: #4a90d9;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(74, 144, 217, 0.2);
         }
         .product-card:active {
             transform: scale(0.95);
@@ -224,21 +232,24 @@
         .product-card .product-code {
             font-size: 10px;
             color: #888;
+            font-weight: 600;
         }
         .product-card .product-name {
-            font-weight: 600;
-            font-size: 13px;
+            font-weight: 700;
+            font-size: 14px;
             margin: 4px 0;
+            color: #1a1a2e;
         }
         .product-card .product-price {
             color: #e94560;
-            font-weight: 700;
-            font-size: 14px;
+            font-weight: 800;
+            font-size: 16px;
+            margin: 2px 0;
         }
         .product-card .product-category {
             font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 10px;
+            padding: 2px 10px;
+            border-radius: 12px;
             color: white;
             display: inline-block;
             margin-top: 4px;
@@ -324,8 +335,8 @@
             gap: 6px;
         }
         .pos-cart .cart-item .item-qty button {
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             border: 2px solid #4a90d9;
             background: white;
@@ -435,9 +446,6 @@
         .stat-card .stat-icon { font-size: 30px; margin-bottom: 6px; }
         
         /* === TABLEAUX === */
-        .table-container {
-            overflow-x: auto;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -550,39 +558,68 @@
             gap: 12px;
         }
         
-        /* === RESPONSIVE === */
+        /* File input stylé */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .file-input-wrapper .file-label {
+            display: block;
+            padding: 10px 12px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            color: #888;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-input-wrapper .file-label:hover {
+            border-color: #4a90d9;
+            background: #f0f7ff;
+        }
+        .file-input-wrapper .file-label .file-name {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .image-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 8px auto;
+            display: block;
+            background: #f0f0f0;
+        }
+        
+        @media (max-width: 1024px) {
+            .products-grid { grid-template-columns: repeat(2, 1fr); }
+        }
         @media (max-width: 768px) {
-            .sidebar {
-                width: 140px;
-                min-width: 140px;
-            }
-            .sidebar .nav-item {
-                font-size: 11px;
-                padding: 8px 12px;
-            }
-            .sidebar .nav-item .icon { font-size: 14px; }
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            .brand-banner {
-                flex-direction: column;
-                text-align: center;
-                padding: 4px 10px;
-            }
-            .brand-banner .brand-logo { font-size: 16px; }
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            }
-            .pos-layout {
-                flex-direction: column;
-            }
-            .pos-cart {
-                width: 100%;
-                min-width: unset;
-            }
+            .sidebar { width: 140px; min-width: 140px; }
+            .sidebar .nav-item { font-size: 11px; padding: 8px 12px; }
+            .form-row { grid-template-columns: 1fr; }
+            .brand-banner { flex-direction: column; text-align: center; padding: 4px 10px; }
+            .products-grid { grid-template-columns: repeat(2, 1fr); }
+            .pos-layout { flex-direction: column; }
+            .pos-cart { width: 100%; min-width: unset; }
+        }
+        @media (max-width: 480px) {
+            .products-grid { grid-template-columns: repeat(2, 1fr); }
+            .product-card .product-image { width: 50px; height: 50px; font-size: 22px; }
+            .product-card .product-name { font-size: 12px; }
+            .product-card .product-price { font-size: 14px; }
         }
     </style>
 </head>
@@ -610,40 +647,24 @@
     </div>
 
     <div class="main-app">
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar -->
         <div class="sidebar">
             <div class="nav-section">
                 <div class="nav-section-label">Dashboard</div>
-                <div class="nav-item active" onclick="showPage('pos', this)">
-                    <span class="icon">🛒</span> Caisse POS
-                </div>
-                <div class="nav-item" onclick="showPage('dashboard', this)">
-                    <span class="icon">📊</span> Tableau de bord
-                </div>
+                <div class="nav-item active" onclick="showPage('pos', this)"><span class="icon">🛒</span> Caisse POS</div>
+                <div class="nav-item" onclick="showPage('dashboard', this)"><span class="icon">📊</span> Tableau de bord</div>
             </div>
             <div class="nav-section">
                 <div class="nav-section-label">Service</div>
-                <div class="nav-item" onclick="showPage('tables', this)">
-                    <span class="icon">🪑</span> Plan des tables
-                </div>
-                <div class="nav-item" onclick="showPage('reservations', this)">
-                    <span class="icon">📅</span> Réservations
-                </div>
-                <div class="nav-item" onclick="showPage('factures', this)">
-                    <span class="icon">🧾</span> Factures
-                </div>
+                <div class="nav-item" onclick="showPage('tables', this)"><span class="icon">🪑</span> Plan des tables</div>
+                <div class="nav-item" onclick="showPage('reservations', this)"><span class="icon">📅</span> Réservations</div>
+                <div class="nav-item" onclick="showPage('factures', this)"><span class="icon">🧾</span> Factures</div>
             </div>
             <div class="nav-section">
                 <div class="nav-section-label">Gestion</div>
-                <div class="nav-item" onclick="showPage('produits', this)">
-                    <span class="icon">🍕</span> Produits & Menu
-                </div>
-                <div class="nav-item" onclick="showPage('clients', this)">
-                    <span class="icon">👥</span> Clients
-                </div>
-                <div class="nav-item" onclick="showPage('financier', this)">
-                    <span class="icon">💰</span> État financier
-                </div>
+                <div class="nav-item" onclick="showPage('produits', this)"><span class="icon">🍕</span> Produits & Menu</div>
+                <div class="nav-item" onclick="showPage('clients', this)"><span class="icon">👥</span> Clients</div>
+                <div class="nav-item" onclick="showPage('financier', this)"><span class="icon">💰</span> État financier</div>
             </div>
         </div>
 
@@ -661,38 +682,23 @@
                             </div>
                             <div class="categories-filter" id="posCategories"></div>
                             <div class="products-grid" id="posProducts">
-                                <div style="text-align:center;padding:40px;color:#999;">⏳ Chargement des produits...</div>
+                                <div style="text-align:center;padding:40px;color:#999;grid-column:1/-1;">⏳ Chargement des produits...</div>
                             </div>
                         </div>
                     </div>
                     <div class="pos-cart">
                         <div class="card" style="flex:1; display:flex; flex-direction:column;">
                             <div class="cart-header">
-                                <div>
-                                    <strong>🛒 Commande</strong>
-                                    <span style="font-size:13px;color:#888;" id="posTableInfo">Table #1</span>
-                                </div>
+                                <div><strong>🛒 Commande</strong> <span style="font-size:13px;color:#888;" id="posTableInfo">Table #1</span></div>
                                 <button class="btn btn-danger btn-sm" onclick="posNewOrder()">➕ Nouvelle</button>
                             </div>
                             <div class="cart-totals">
-                                <div class="total-line">
-                                    <span>📊 Sous-total</span>
-                                    <span class="value subtotal-value" id="posSubtotal">0 FCFA</span>
-                                </div>
-                                <div class="total-line">
-                                    <span>📈 TVA (18%)</span>
-                                    <span class="value taxes-value" id="posTaxes">0 FCFA</span>
-                                </div>
-                                <div class="total-line grand-total">
-                                    <span>💰 TOTAL</span>
-                                    <span class="value" id="posTotal">0 FCFA</span>
-                                </div>
+                                <div class="total-line"><span>📊 Sous-total</span><span class="value subtotal-value" id="posSubtotal">0 FCFA</span></div>
+                                <div class="total-line"><span>📈 TVA (18%)</span><span class="value taxes-value" id="posTaxes">0 FCFA</span></div>
+                                <div class="total-line grand-total"><span>💰 TOTAL</span><span class="value" id="posTotal">0 FCFA</span></div>
                             </div>
                             <div class="cart-items" id="posCart">
-                                <div class="empty-cart">
-                                    <div class="icon">🛒</div>
-                                    <p>Sélectionnez des produits</p>
-                                </div>
+                                <div class="empty-cart"><div class="icon">🛒</div><p>Sélectionnez des produits</p></div>
                             </div>
                             <button class="btn btn-success btn-pay" id="posPayBtn" disabled onclick="posPay()">💳 Payer</button>
                         </div>
@@ -704,30 +710,21 @@
             <div class="page" id="page-dashboard">
                 <h2 style="margin-bottom:16px;">📊 Tableau de bord</h2>
                 <div class="stats-grid" id="dashboardStats"></div>
-                <div class="card">
-                    <div class="card-title">📈 Meilleurs produits du mois</div>
-                    <div id="topProducts"></div>
-                </div>
+                <div class="card"><div class="card-title">📈 Meilleurs produits du mois</div><div id="topProducts"></div></div>
             </div>
 
             <!-- Page Tables -->
             <div class="page" id="page-tables">
                 <h2 style="margin-bottom:16px;">🪑 Plan des tables</h2>
                 <div class="stats-grid" id="tablesStats"></div>
-                <div class="card">
-                    <div class="card-title">Tables</div>
-                    <div id="tablesList" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px;"></div>
-                </div>
+                <div class="card"><div class="card-title">Tables</div><div id="tablesList" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px;"></div></div>
             </div>
 
             <!-- Page Reservations -->
             <div class="page" id="page-reservations">
                 <h2 style="margin-bottom:16px;">📅 Réservations</h2>
                 <div class="card">
-                    <div class="card-title">
-                        <span>Réservations du jour</span>
-                        <button class="btn btn-primary btn-sm" onclick="openReservationModal()">➕ Nouvelle</button>
-                    </div>
+                    <div class="card-title"><span>Réservations du jour</span><button class="btn btn-primary btn-sm" onclick="openReservationModal()">➕ Nouvelle</button></div>
                     <div id="reservationsList"></div>
                 </div>
             </div>
@@ -735,20 +732,14 @@
             <!-- Page Factures -->
             <div class="page" id="page-factures">
                 <h2 style="margin-bottom:16px;">🧾 Factures</h2>
-                <div class="card">
-                    <div class="card-title">Historique des factures</div>
-                    <div id="facturesList"></div>
-                </div>
+                <div class="card"><div class="card-title">Historique des factures</div><div id="facturesList"></div></div>
             </div>
 
             <!-- Page Produits -->
             <div class="page" id="page-produits">
                 <h2 style="margin-bottom:16px;">🍕 Produits & Menu</h2>
                 <div class="card">
-                    <div class="card-title">
-                        <span>Liste des produits</span>
-                        <button class="btn btn-primary btn-sm" onclick="openProductModal()">➕ Nouveau produit</button>
-                    </div>
+                    <div class="card-title"><span>Liste des produits</span><button class="btn btn-primary btn-sm" onclick="openProductModal()">➕ Nouveau produit</button></div>
                     <div id="produitsList" class="products-grid"></div>
                 </div>
             </div>
@@ -757,10 +748,7 @@
             <div class="page" id="page-clients">
                 <h2 style="margin-bottom:16px;">👥 Clients</h2>
                 <div class="card">
-                    <div class="card-title">
-                        <span>Liste des clients</span>
-                        <button class="btn btn-primary btn-sm" onclick="openClientModal()">➕ Nouveau client</button>
-                    </div>
+                    <div class="card-title"><span>Liste des clients</span><button class="btn btn-primary btn-sm" onclick="openClientModal()">➕ Nouveau client</button></div>
                     <div id="clientsList"></div>
                 </div>
             </div>
@@ -883,23 +871,19 @@
             if(cat && cat!=='all') params.append('categorie', cat);
             if(params.toString()) url+='?'+params.toString();
             
-            console.log('Chargement des produits depuis:', url);
             const res=await apiCall(url);
-            console.log('Réponse API:', res);
-            
             if(res.success) {
                 state.produits=res.data;
-                console.log('Nombre de produits:', state.produits.length);
                 posRenderProducts();
             } else {
-                document.getElementById('posProducts').innerHTML='<div style="text-align:center;padding:40px;color:#e74c3c;">❌ Erreur de chargement: '+(res.error||'Inconnu')+'</div>';
+                document.getElementById('posProducts').innerHTML='<div style="text-align:center;padding:40px;color:#e74c3c;grid-column:1/-1;">❌ Erreur de chargement: '+(res.error||'Inconnu')+'</div>';
             }
         }
 
         function posRenderProducts() {
             const grid=document.getElementById('posProducts');
             if(!state.produits || !state.produits.length) {
-                grid.innerHTML='<div style="text-align:center;padding:40px;color:#999;">🔍 Aucun produit trouvé<br><span style="font-size:12px;color:#bbb;">Essayez "BOI" ou "VIN"</span></div>';
+                grid.innerHTML='<div style="text-align:center;padding:40px;color:#999;grid-column:1/-1;">🔍 Aucun produit trouvé<br><span style="font-size:12px;color:#bbb;">Essayez "BOI" ou "PLA"</span></div>';
                 return;
             }
             grid.innerHTML=state.produits.map(p=>{
@@ -1242,23 +1226,41 @@
             }
         }
 
+        // ==================== PRODUCT MODAL AVEC UPLOAD IMAGE ====================
         function openProductModal(data={}) {
             const isEdit=!!data.id;
+            const imageHtml = data.image_url ? `<img src="${data.image_url}" class="image-preview" id="imagePreview">` : `<div class="image-preview" id="imagePreview" style="display:flex;align-items:center;justify-content:center;font-size:30px;">🍽️</div>`;
+            
             openModal(isEdit?'✏️ Modifier le produit':'➕ Nouveau produit', `
-                <div class="form-group"><label>Nom</label><input id="prodNom" value="${data.nom||''}"></div>
-                <div class="form-group"><label>Description</label><textarea id="prodDesc">${data.description||''}</textarea></div>
-                <div class="form-row">
-                    <div class="form-group"><label>Prix</label><input type="number" id="prodPrix" value="${data.prix||''}"></div>
-                    <div class="form-group"><label>Prix achat</label><input type="number" id="prodAchat" value="${data.prix_achat||''}"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Catégorie</label><select id="prodCategorie"></select></div>
-                    <div class="form-group"><label>Stock</label><input type="number" id="prodStock" value="${data.stock||0}"></div>
-                </div>
-                <div class="form-group"><label>Unité</label><input id="prodUnite" value="${data.unite||'portion'}"></div>
-                <div class="form-group"><label>Image URL</label><input id="prodImage" value="${data.image_url||''}" placeholder="https://exemple.com/image.jpg"></div>
-                <button class="btn btn-success" onclick="saveProduct(${data.id||0})" style="width:100%;">✅ Enregistrer</button>
+                <form id="productForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Image du produit</label>
+                        ${imageHtml}
+                        <div class="file-input-wrapper">
+                            <div class="file-label" onclick="document.getElementById('imageFile').click()">
+                                📁 <span class="file-name">${data.image_url ? 'Image existante' : 'Choisir une image'}</span>
+                            </div>
+                            <input type="file" id="imageFile" accept="image/*" onchange="previewImage(this)">
+                        </div>
+                        <small style="color:#888;">Formats acceptés: JPG, PNG, GIF</small>
+                    </div>
+                    <div class="form-group"><label>Nom</label><input id="prodNom" value="${data.nom||''}" required></div>
+                    <div class="form-group"><label>Description</label><textarea id="prodDesc">${data.description||''}</textarea></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Prix</label><input type="number" id="prodPrix" value="${data.prix||''}" required step="0.01"></div>
+                        <div class="form-group"><label>Prix achat</label><input type="number" id="prodAchat" value="${data.prix_achat||''}" step="0.01"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Catégorie</label><select id="prodCategorie"></select></div>
+                        <div class="form-group"><label>Stock</label><input type="number" id="prodStock" value="${data.stock||0}"></div>
+                    </div>
+                    <div class="form-group"><label>Unité</label><input id="prodUnite" value="${data.unite||'portion'}"></div>
+                    <input type="hidden" id="prodImageUrl" value="${data.image_url||''}">
+                    <button type="button" class="btn btn-success" onclick="saveProduct(${data.id||0})" style="width:100%;">✅ Enregistrer</button>
+                </form>
             `);
+            
+            // Charger les catégories
             apiCall('/api/categories').then(r=>{
                 if(r.success) {
                     const sel=document.getElementById('prodCategorie');
@@ -1267,29 +1269,74 @@
             });
         }
 
+        // Preview image before upload
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    if (preview) {
+                        preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                    }
+                    // Mettre à jour le label
+                    const label = document.querySelector('.file-label .file-name');
+                    if (label) label.textContent = input.files[0].name;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // ==================== SAVE PRODUCT WITH IMAGE UPLOAD ====================
         async function saveProduct(id) {
-            const data={
-                nom: document.getElementById('prodNom').value,
-                description: document.getElementById('prodDesc').value,
-                prix: parseFloat(document.getElementById('prodPrix').value) || 0,
-                prix_achat: parseFloat(document.getElementById('prodAchat').value) || 0,
-                categorie_id: parseInt(document.getElementById('prodCategorie').value) || null,
-                stock: parseInt(document.getElementById('prodStock').value) || 0,
-                unite: document.getElementById('prodUnite').value || 'portion',
-                image_url: document.getElementById('prodImage').value || null
-            };
-            if(!data.nom || !data.prix) {
+            const formData = new FormData();
+            const nom = document.getElementById('prodNom').value;
+            const prix = parseFloat(document.getElementById('prodPrix').value) || 0;
+            
+            if(!nom || !prix) {
                 showToast('Nom et prix obligatoires','error');
                 return;
             }
-            const url=id ? `/api/produits/${id}` : '/api/produits';
-            const method=id ? 'PUT' : 'POST';
-            const res=await apiCall(url, {method, body:JSON.stringify(data)});
-            if(res.success) {
-                showToast(id?'Produit modifié !':'Produit créé !','success');
-                closeModal();
-                loadProduits();
-                posLoadProducts();
+            
+            formData.append('nom', nom);
+            formData.append('description', document.getElementById('prodDesc').value || '');
+            formData.append('prix', prix);
+            formData.append('prix_achat', parseFloat(document.getElementById('prodAchat').value) || 0);
+            formData.append('categorie_id', document.getElementById('prodCategorie').value || '');
+            formData.append('stock', parseInt(document.getElementById('prodStock').value) || 0);
+            formData.append('unite', document.getElementById('prodUnite').value || 'portion');
+            formData.append('disponible', 1);
+            
+            // Ajouter l'image si présente
+            const fileInput = document.getElementById('imageFile');
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                formData.append('image', fileInput.files[0]);
+            } else {
+                // Garder l'image existante
+                const existingImage = document.getElementById('prodImageUrl');
+                if (existingImage && existingImage.value) {
+                    formData.append('image_url', existingImage.value);
+                }
+            }
+            
+            const url = id ? `/api/produits/${id}` : '/api/produits';
+            const method = id ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+                const data = await response.json();
+                if(data.success) {
+                    showToast(id ? 'Produit modifié !' : 'Produit créé !', 'success');
+                    closeModal();
+                    loadProduits();
+                    posLoadProducts();
+                } else {
+                    showToast('Erreur: ' + (data.error || 'Inconnue'), 'error');
+                }
+            } catch(e) {
+                showToast('Erreur: ' + e.message, 'error');
             }
         }
 
@@ -1415,19 +1462,16 @@
 
         // ==================== INIT ====================
         document.addEventListener('DOMContentLoaded', function() {
-            // Horloge
             function updateClock() {
                 document.getElementById('currentTime').textContent=new Date().toLocaleTimeString('fr-FR');
             }
             updateClock();
             setInterval(updateClock,1000);
             
-            // Charger POS
             posLoadCategories();
             posLoadProducts();
             setTimeout(posNewOrder,500);
             
-            // Dates financier
             const now=new Date();
             const firstDay=new Date(now.getFullYear(), now.getMonth(), 1);
             document.getElementById('finDebut').value=firstDay.toISOString().split('T')[0];
