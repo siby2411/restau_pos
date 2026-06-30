@@ -11,6 +11,7 @@
             background: #f0f2f5;
             min-height: 100vh;
             touch-action: manipulation;
+            user-select: none;
         }
         .header {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -106,6 +107,7 @@
             cursor: pointer;
             touch-action: manipulation;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         .categories-filter button.active {
             background: #4a90d9;
@@ -194,32 +196,53 @@
             align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid #f0f0f0;
+            gap: 8px;
         }
-        .cart-item .item-info { flex: 1; }
-        .cart-item .item-name { font-weight: 600; font-size: 14px; }
+        .cart-item .item-info { flex: 1; min-width: 0; }
+        .cart-item .item-name { font-weight: 600; font-size: 14px; word-break: break-word; }
         .cart-item .item-price { color: #666; font-size: 13px; }
         .cart-item .item-qty {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
         .cart-item .item-qty button {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            border: 2px solid #ddd;
+            border: 2px solid #4a90d9;
             background: white;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
+            color: #4a90d9;
             cursor: pointer;
             touch-action: manipulation;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.1s;
         }
-        .cart-item .item-qty button:active { transform: scale(0.9); background: #f0f0f0; }
-        .cart-item .item-qty .qty { font-weight: 600; min-width: 24px; text-align: center; }
-        .cart-item .item-total { font-weight: 700; color: #e94560; min-width: 70px; text-align: right; }
+        .cart-item .item-qty button:active { 
+            transform: scale(0.85); 
+            background: #4a90d9;
+            color: white;
+        }
+        .cart-item .item-qty .qty { 
+            font-weight: 700; 
+            min-width: 30px; 
+            text-align: center;
+            font-size: 16px;
+            color: #1a1a2e;
+        }
+        .cart-item .item-total { 
+            font-weight: 700; 
+            color: #e94560; 
+            min-width: 80px; 
+            text-align: right;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
         .cart-footer {
             padding: 12px 16px;
             border-top: 2px solid #e0e0e0;
@@ -254,6 +277,7 @@
             cursor: pointer;
             margin-top: 8px;
             touch-action: manipulation;
+            transition: opacity 0.2s;
         }
         .cart-footer .btn-pay:active { transform: scale(0.98); }
         .cart-footer .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -264,6 +288,30 @@
         }
         .empty-message .icon { font-size: 48px; margin-bottom: 12px; }
         .loading { text-align: center; padding: 20px; color: #666; }
+        
+        /* Notification toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .toast.success { background: #27ae60; }
+        .toast.error { background: #e74c3c; }
+        .toast.info { background: #3498db; }
+
         @media (max-width: 768px) {
             .main-container { flex-direction: column; height: auto; }
             .products-panel { height: 50vh; }
@@ -295,7 +343,7 @@
         <div class="products-panel">
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="🔍 Rechercher (code, nom, catégorie...)" oninput="searchProducts()">
-                <button class="btn-search" onclick="searchProducts()">Rechercher</button>
+                <button class="btn-search" onclick="searchProducts()">🔍</button>
                 <button class="btn-reset" onclick="resetSearch()">✕</button>
             </div>
 
@@ -342,6 +390,9 @@
         </div>
     </div>
 
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
     <script>
         // ==================== ÉTAT ====================
         let state = {
@@ -355,14 +406,23 @@
             isLoading: false
         };
 
+        // ==================== TOAST ====================
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
         // ==================== INIT ====================
         document.addEventListener('DOMContentLoaded', function() {
             loadCategories();
             loadProducts();
             updateClock();
             setInterval(updateClock, 1000);
-            
-            // Démarrer avec une nouvelle commande
             setTimeout(() => newOrder(), 500);
         });
 
@@ -380,13 +440,9 @@
                 return data;
             } catch (error) {
                 console.error('API Error:', error);
-                showError(error.message);
+                showToast(error.message, 'error');
                 return { success: false, error: error.message };
             }
-        }
-
-        function showError(msg) {
-            alert('❌ ' + msg);
         }
 
         // ==================== PRODUITS ====================
@@ -481,16 +537,15 @@
 
         // ==================== PANIER ====================
         async function addToCart(productId, name, price) {
-            // Vérifier si une commande est en cours
             if (!state.currentFactureId) {
-                await newOrder();
-                if (!state.currentFactureId) {
-                    showError('Impossible de créer une commande');
+                const ok = await newOrder();
+                if (!ok) {
+                    showToast('Impossible de créer une commande', 'error');
                     return;
                 }
             }
 
-            // Vérifier si déjà dans le panier
+            // Ajouter au panier local
             const existing = state.cart.find(item => item.productId === productId);
             if (existing) {
                 existing.quantity += 1;
@@ -498,7 +553,7 @@
                 state.cart.push({ productId, name, price, quantity: 1 });
             }
 
-            // Ajouter à la facture via API
+            // Envoyer à l'API
             const result = await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
                 method: 'POST',
                 body: JSON.stringify({ produit_id: productId, quantite: 1 })
@@ -506,7 +561,6 @@
             
             if (result.success) {
                 renderCart();
-                // Mettre à jour les totaux
                 if (result.totaux) {
                     updateTotals(
                         parseFloat(result.totaux.sous_total),
@@ -514,42 +568,108 @@
                         parseFloat(result.totaux.total)
                     );
                 }
+                showToast(`${name} ajouté !`, 'success');
             } else {
-                showError('Erreur lors de l\'ajout du produit');
-                // Retirer du panier en cas d'erreur
+                // Annuler l'ajout local
                 const idx = state.cart.findIndex(i => i.productId === productId);
                 if (idx !== -1) state.cart.splice(idx, 1);
+                renderCart();
+                showToast('Erreur lors de l\'ajout', 'error');
             }
         }
 
-        function updateQuantity(productId, delta) {
+        async function updateQuantity(productId, delta) {
             const item = state.cart.find(i => i.productId === productId);
-            if (!item) return;
-            
-            const newQty = item.quantity + delta;
-            if (newQty <= 0) {
-                state.cart = state.cart.filter(i => i.productId !== productId);
-            } else {
-                item.quantity = newQty;
+            if (!item) {
+                console.error('Produit non trouvé dans le panier:', productId);
+                return;
             }
             
-            // Mettre à jour via API (ajouter ou supprimer)
-            if (newQty > 0) {
-                // Pour simplifier, on ajoute une unité ou on enlève
-                // Ici on utilise une approche simple : on ajoute/supprime une unité
-                const action = delta > 0 ? 'add' : 'remove';
-                const qty = Math.abs(delta);
-                // On pourrait implémenter une mise à jour plus précise
-                // Pour l'instant on recharge la facture
-                refreshCart();
+            const newQty = item.quantity + delta;
+            
+            if (newQty <= 0) {
+                // Supprimer l'article
+                state.cart = state.cart.filter(i => i.productId !== productId);
+                await updateFactureItem(productId, 0);
+                showToast(`${item.name} retiré`, 'info');
             } else {
-                // Si supprimé, on recharge
-                refreshCart();
+                // Mettre à jour la quantité
+                item.quantity = newQty;
+                await updateFactureItem(productId, newQty);
+            }
+            
+            renderCart();
+            await refreshTotals();
+        }
+
+        async function updateFactureItem(productId, quantity) {
+            if (!state.currentFactureId) return;
+            
+            // Récupérer la facture pour connaître les lignes
+            const result = await apiCall(`/api/factures/${state.currentFactureId}`);
+            if (result.success) {
+                const lignes = result.data.lignes || [];
+                const ligne = lignes.find(l => l.produit_id === productId);
+                
+                if (ligne) {
+                    if (quantity <= 0) {
+                        // Supprimer la ligne
+                        await apiCall(`/api/factures/${state.currentFactureId}/lignes/${ligne.id}`, {
+                            method: 'DELETE'
+                        });
+                    } else {
+                        // Mettre à jour la quantité (approche: supprimer et recréer)
+                        // Pour simplifier, on ajoute une ligne avec la différence
+                        const diff = quantity - ligne.quantite;
+                        if (diff !== 0) {
+                            if (diff > 0) {
+                                await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
+                                    method: 'POST',
+                                    body: JSON.stringify({ produit_id: productId, quantite: diff })
+                                });
+                            } else {
+                                // Pour réduire, on supprime et recrée
+                                await apiCall(`/api/factures/${state.currentFactureId}/lignes/${ligne.id}`, {
+                                    method: 'DELETE'
+                                });
+                                if (quantity > 0) {
+                                    await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
+                                        method: 'POST',
+                                        body: JSON.stringify({ produit_id: productId, quantite: quantity })
+                                    });
+                                }
+                            }
+                        }
+                    }
+                } else if (quantity > 0) {
+                    // Ajouter la ligne
+                    await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
+                        method: 'POST',
+                        body: JSON.stringify({ produit_id: productId, quantite: quantity })
+                    });
+                }
+            }
+        }
+
+        async function refreshTotals() {
+            if (!state.currentFactureId) return;
+            const result = await apiCall(`/api/factures/${state.currentFactureId}`);
+            if (result.success) {
+                const data = result.data;
+                if (data.sous_total !== undefined) {
+                    updateTotals(
+                        parseFloat(data.sous_total),
+                        parseFloat(data.taxes),
+                        parseFloat(data.total)
+                    );
+                }
             }
         }
 
         function renderCart() {
             const container = document.getElementById('cartItems');
+            const btnPay = document.getElementById('btnPay');
+            
             if (state.cart.length === 0) {
                 container.innerHTML = `
                     <div class="empty-message">
@@ -557,30 +677,29 @@
                         <p>Sélectionnez des produits</p>
                     </div>
                 `;
-                document.getElementById('btnPay').disabled = true;
+                btnPay.disabled = true;
                 updateTotals(0, 0, 0);
                 return;
             }
 
-            container.innerHTML = state.cart.map(item => `
-                <div class="cart-item">
+            container.innerHTML = state.cart.map((item, index) => `
+                <div class="cart-item" data-index="${index}">
                     <div class="item-info">
                         <div class="item-name">${item.name}</div>
                         <div class="item-price">${formatPrice(item.price)}</div>
                     </div>
                     <div class="item-qty">
-                        <button onclick="updateQuantity(${item.productId}, -1)">−</button>
-                        <span class="qty">${item.quantity}</span>
-                        <button onclick="updateQuantity(${item.productId}, 1)">+</button>
+                        <button onclick="updateQuantity(${item.productId}, -1)" data-action="decrease">−</button>
+                        <span class="qty" id="qty-${item.productId}">${item.quantity}</span>
+                        <button onclick="updateQuantity(${item.productId}, 1)" data-action="increase">+</button>
                     </div>
                     <div class="item-total">${formatPrice(item.price * item.quantity)}</div>
                 </div>
             `).join('');
 
-            // Mettre à jour les totaux
+            btnPay.disabled = false;
             const totals = calculateTotals();
             updateTotals(totals.subtotal, totals.taxes, totals.total);
-            document.getElementById('btnPay').disabled = state.cart.length === 0;
         }
 
         function calculateTotals() {
@@ -600,29 +719,6 @@
             return Number(price).toLocaleString('fr-FR') + ' FCFA';
         }
 
-        async function refreshCart() {
-            if (!state.currentFactureId) return;
-            const result = await apiCall(`/api/factures/${state.currentFactureId}`);
-            if (result.success) {
-                const data = result.data;
-                // Mettre à jour le panier
-                state.cart = (data.lignes || []).map(l => ({
-                    productId: l.produit_id,
-                    name: l.produit_nom,
-                    price: parseFloat(l.prix_unitaire),
-                    quantity: l.quantite
-                }));
-                renderCart();
-                if (data.sous_total) {
-                    updateTotals(
-                        parseFloat(data.sous_total),
-                        parseFloat(data.taxes),
-                        parseFloat(data.total)
-                    );
-                }
-            }
-        }
-
         // ==================== FACTURES ====================
         async function newOrder() {
             try {
@@ -639,24 +735,26 @@
                     document.getElementById('orderCount').textContent = `#${result.data.numero}`;
                     document.getElementById('btnPay').disabled = true;
                     updateTotals(0, 0, 0);
+                    showToast(`Commande ${result.data.numero} créée`, 'success');
                     return true;
                 } else {
-                    showError('Erreur lors de la création de la commande');
+                    showToast('Erreur lors de la création de la commande', 'error');
                     return false;
                 }
             } catch (error) {
-                showError('Erreur: ' + error.message);
+                showToast('Erreur: ' + error.message, 'error');
                 return false;
             }
         }
 
         async function payOrder() {
             if (!state.currentFactureId || state.cart.length === 0) {
-                showError('Panier vide');
+                showToast('Panier vide', 'error');
                 return;
             }
             
-            if (!confirm('Confirmer le paiement de ' + document.getElementById('total').textContent + ' ?')) return;
+            const total = document.getElementById('total').textContent;
+            if (!confirm(`Confirmer le paiement de ${total} ?`)) return;
             
             const result = await apiCall(`/api/factures/${state.currentFactureId}`, {
                 method: 'PUT',
@@ -667,11 +765,10 @@
             });
             
             if (result.success) {
-                alert('✅ Paiement effectué avec succès !');
-                // Créer une nouvelle commande
+                showToast('✅ Paiement effectué avec succès !', 'success');
                 await newOrder();
             } else {
-                showError('Erreur lors du paiement');
+                showToast('❌ Erreur lors du paiement', 'error');
             }
         }
 
