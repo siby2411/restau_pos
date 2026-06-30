@@ -88,66 +88,296 @@
             border-radius: 20px; 
             font-size: 11px;
         }
-        .main-container {
+        
+        /* === LAYOUT PRINCIPAL === */
+        .main-app {
             display: flex;
             height: calc(100vh - 95px);
-            gap: 0;
         }
-        .products-panel {
+        
+        /* === NAVIGATION LATÉRALE === */
+        .sidebar {
+            width: 200px;
+            min-width: 200px;
+            background: #1a1a2e;
+            color: white;
+            overflow-y: auto;
+            padding: 10px 0;
+            border-right: 2px solid #e94560;
+        }
+        .sidebar .nav-section {
+            margin-bottom: 10px;
+        }
+        .sidebar .nav-section-label {
+            padding: 6px 16px;
+            font-size: 10px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .sidebar .nav-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .sidebar .nav-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .sidebar .nav-item.active {
+            background: rgba(233, 69, 96, 0.15);
+            border-left-color: #e94560;
+            color: #e94560;
+        }
+        .sidebar .nav-item .icon { font-size: 16px; }
+        
+        /* === CONTENU PRINCIPAL === */
+        .content {
             flex: 1;
-            padding: 8px;
+            padding: 16px;
             overflow-y: auto;
             background: #f8f9fa;
         }
-        .search-bar {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
-        }
-        .search-bar input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            min-width: 120px;
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        /* === CARTES ET FORMULAIRES === */
+        .card {
             background: white;
-            transition: border-color 0.3s;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
         }
-        .search-bar input:focus {
-            outline: none;
-            border-color: #4a90d9;
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .search-bar input::placeholder { color: #999; }
-        .search-bar .btn-search {
-            padding: 10px 16px;
-            background: #4a90d9;
-            color: white;
+        
+        .btn {
+            padding: 10px 20px;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             touch-action: manipulation;
-        }
-        .search-bar .btn-search:active { transform: scale(0.95); }
-        .search-bar .btn-reset {
-            padding: 10px 14px;
-            background: #e94560;
-            color: white;
-            border: none;
-            border-radius: 10px;
+            transition: all 0.2s;
             font-size: 14px;
-            cursor: pointer;
-            touch-action: manipulation;
         }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: #4a90d9; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        /* === GRILLE PRODUITS POS === */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            cursor: pointer;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .product-card:hover {
+            border-color: #4a90d9;
+            transform: translateY(-2px);
+        }
+        .product-card:active {
+            transform: scale(0.95);
+        }
+        .product-card .product-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            overflow: hidden;
+        }
+        .product-card .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .product-card .product-code {
+            font-size: 10px;
+            color: #888;
+        }
+        .product-card .product-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin: 4px 0;
+        }
+        .product-card .product-price {
+            color: #e94560;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .product-card .product-category {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            color: white;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .product-card .product-stock {
+            font-size: 10px;
+            color: #888;
+            margin-top: 4px;
+        }
+        
+        /* === POS LAYOUT === */
+        .pos-layout {
+            display: flex;
+            gap: 16px;
+            height: 100%;
+        }
+        .pos-products {
+            flex: 1;
+            min-width: 0;
+        }
+        .pos-cart {
+            width: 420px;
+            min-width: 340px;
+            display: flex;
+            flex-direction: column;
+        }
+        .pos-cart .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .pos-cart .cart-totals {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .pos-cart .cart-totals .total-line {
+            display: flex;
+            justify-content: space-between;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            padding: 2px 0;
+        }
+        .pos-cart .cart-totals .total-line .value {
+            font-weight: 600;
+        }
+        .pos-cart .cart-totals .total-line .subtotal-value { color: #4a90d9; }
+        .pos-cart .cart-totals .total-line .taxes-value { color: #f39c12; }
+        .pos-cart .cart-totals .total-line.grand-total {
+            font-size: 22px;
+            font-weight: 800;
+            padding: 6px 0 3px 0;
+            border-top: 2px solid rgba(255,255,255,0.2);
+            margin-top: 4px;
+            color: white;
+        }
+        .pos-cart .cart-totals .total-line.grand-total .value {
+            color: #2ecc71;
+            font-size: 24px;
+            text-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
+        }
+        .pos-cart .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        .pos-cart .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 8px;
+        }
+        .pos-cart .cart-item .item-info { flex: 1; }
+        .pos-cart .cart-item .item-name { font-weight: 600; font-size: 13px; }
+        .pos-cart .cart-item .item-price { color: #666; font-size: 12px; }
+        .pos-cart .cart-item .item-qty {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pos-cart .cart-item .item-qty button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #4a90d9;
+            background: white;
+            font-size: 16px;
+            font-weight: 700;
+            color: #4a90d9;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pos-cart .cart-item .item-qty button:active {
+            transform: scale(0.85);
+            background: #4a90d9;
+            color: white;
+        }
+        .pos-cart .cart-item .item-qty .qty {
+            font-weight: 700;
+            min-width: 24px;
+            text-align: center;
+        }
+        .pos-cart .cart-item .item-total {
+            font-weight: 700;
+            color: #e94560;
+            min-width: 80px;
+            text-align: right;
+        }
+        .pos-cart .btn-pay {
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+        .pos-cart .btn-pay:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pos-cart .empty-cart {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        .pos-cart .empty-cart .icon { font-size: 40px; margin-bottom: 8px; }
+        
+        /* === CATEGORIES FILTER === */
         .categories-filter {
             display: flex;
-            gap: 5px;
-            margin-bottom: 8px;
+            gap: 6px;
+            margin-bottom: 12px;
             overflow-x: auto;
-            padding: 3px 0;
+            padding: 4px 0;
             flex-wrap: nowrap;
             -webkit-overflow-scrolling: touch;
         }
@@ -175,211 +405,60 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            margin-right: 5px;
+            margin-right: 4px;
         }
-        .products-grid {
+        
+        /* === STATS === */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
         }
-        .product-card {
+        .stat-card {
             background: white;
             border-radius: 10px;
-            padding: 10px;
+            padding: 16px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-            cursor: pointer;
-            transition: all 0.15s;
-            touch-action: manipulation;
-            border: 2px solid transparent;
-            position: relative;
-        }
-        .product-card:active {
-            transform: scale(0.96);
-            border-color: #4a90d9;
-            background: #f0f7ff;
-        }
-        .product-card .code { font-size: 10px; color: #888; font-weight: 600; }
-        .product-card .name { font-size: 13px; font-weight: 600; margin: 3px 0; color: #1a1a2e; }
-        .product-card .price { font-size: 15px; font-weight: 700; color: #e94560; }
-        .product-card .category-tag {
-            display: inline-block;
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 8px;
-            color: white;
-            margin-top: 3px;
-        }
-        .product-card .stock { font-size: 9px; color: #888; margin-top: 3px; }
-        
-        /* === PANIER AVEC TOTAUX EN HAUT === */
-        .cart-panel {
-            width: 420px;
-            min-width: 340px;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid #e0e0e0;
-            max-height: calc(100vh - 95px);
-        }
-        .cart-header {
-            padding: 10px 16px;
-            background: #1a1a2e;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .cart-header .table-info { font-size: 13px; }
-        .cart-header .btn-new-order {
-            padding: 5px 14px;
-            background: #e94560;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .cart-header .btn-new-order:active { transform: scale(0.95); }
-        
-        /* === TOTAUX EN HAUT (juste sous l'en-tête) === */
-        .cart-totals-top {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            padding: 10px 16px;
-            flex-shrink: 0;
-            border-bottom: 2px solid #e94560;
-        }
-        .cart-totals-top .total-line {
-            display: flex;
-            justify-content: space-between;
-            padding: 3px 0;
-            font-size: 14px;
-            color: rgba(255,255,255,0.8);
-        }
-        .cart-totals-top .total-line .label {
-            font-weight: 400;
-        }
-        .cart-totals-top .total-line .value {
-            font-weight: 600;
-        }
-        .cart-totals-top .total-line.sous-total .value {
-            color: #4a90d9;
-        }
-        .cart-totals-top .total-line.tva .value {
-            color: #f39c12;
-        }
-        .cart-totals-top .total-line.grand-total {
-            font-size: 22px;
-            font-weight: 800;
-            padding: 6px 0 3px 0;
-            border-top: 2px solid rgba(255,255,255,0.2);
-            margin-top: 4px;
-            color: white;
-        }
-        .cart-totals-top .total-line.grand-total .label {
-            color: rgba(255,255,255,0.6);
-            font-weight: 600;
-        }
-        .cart-totals-top .total-line.grand-total .value {
-            color: #2ecc71;
-            font-size: 24px;
-            font-weight: 800;
-            text-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
-        }
-        
-        .cart-items {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 16px;
-        }
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-            gap: 6px;
-        }
-        .cart-item .item-info { flex: 1; min-width: 0; }
-        .cart-item .item-name { font-weight: 600; font-size: 13px; word-break: break-word; }
-        .cart-item .item-price { color: #666; font-size: 12px; }
-        .cart-item .item-qty {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-        .cart-item .item-qty button {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 2px solid #4a90d9;
-            background: white;
-            font-size: 16px;
-            font-weight: 700;
-            color: #4a90d9;
-            cursor: pointer;
-            touch-action: manipulation;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.1s;
-        }
-        .cart-item .item-qty button:active { 
-            transform: scale(0.85); 
-            background: #4a90d9;
-            color: white;
-        }
-        .cart-item .item-qty .qty { 
-            font-weight: 700; 
-            min-width: 28px; 
             text-align: center;
-            font-size: 15px;
+        }
+        .stat-card .stat-number {
+            font-size: 28px;
+            font-weight: 800;
             color: #1a1a2e;
         }
-        .cart-item .item-total { 
-            font-weight: 700; 
-            color: #e94560; 
-            min-width: 80px; 
-            text-align: right;
-            font-size: 14px;
-            flex-shrink: 0;
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
         }
+        .stat-card .stat-icon { font-size: 30px; margin-bottom: 6px; }
         
-        /* === FOOTER DU PANIER (bouton payer) === */
-        .cart-footer {
-            padding: 10px 16px;
-            border-top: 2px solid #e0e0e0;
-            background: #f8f9fa;
-            flex-shrink: 0;
+        /* === TABLEAUX === */
+        .table-container {
+            overflow-x: auto;
         }
-        .cart-footer .btn-pay {
+        table {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        table th {
+            background: #1a1a2e;
             color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            touch-action: manipulation;
-            transition: all 0.2s;
-            letter-spacing: 1px;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
         }
-        .cart-footer .btn-pay:active { transform: scale(0.98); }
-        .cart-footer .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .empty-message {
-            text-align: center;
-            padding: 30px 20px;
-            color: #999;
+        table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e0e0e0;
         }
-        .empty-message .icon { font-size: 40px; margin-bottom: 8px; }
-        .loading { text-align: center; padding: 20px; color: #666; }
+        table tr:hover td {
+            background: #f0f7ff;
+        }
         
-        /* Toast notification */
+        /* === TOAST === */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -397,48 +476,112 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             max-width: 90%;
         }
-        .toast.show {
-            opacity: 1;
-        }
+        .toast.show { opacity: 1; }
         .toast.success { background: #27ae60; }
         .toast.error { background: #e74c3c; }
         .toast.info { background: #3498db; }
-
+        
+        /* === MODAL === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-header h2 { font-size: 20px; color: #1a1a2e; }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        /* === RESPONSIVE === */
         @media (max-width: 768px) {
-            .main-container { flex-direction: column; height: auto; }
-            .products-panel { height: 45vh; }
-            .cart-panel { 
-                width: 100%; 
-                min-width: unset; 
-                max-height: 55vh;
-                border-left: none;
-                border-top: 1px solid #e0e0e0;
+            .sidebar {
+                width: 140px;
+                min-width: 140px;
             }
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            .sidebar .nav-item {
+                font-size: 11px;
+                padding: 8px 12px;
             }
-            .search-bar input { font-size: 13px; padding: 8px 12px; }
+            .sidebar .nav-item .icon { font-size: 14px; }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
             .brand-banner {
                 flex-direction: column;
                 text-align: center;
-                gap: 3px;
                 padding: 4px 10px;
             }
-            .brand-banner .brand-left {
-                flex-direction: column;
-                gap: 2px;
-            }
             .brand-banner .brand-logo { font-size: 16px; }
-            .brand-banner .brand-slogan { font-size: 10px; }
-            .brand-banner .brand-right { font-size: 10px; gap: 8px; }
-            .cart-totals-top .total-line.grand-total {
-                font-size: 18px;
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
             }
-            .cart-totals-top .total-line.grand-total .value {
-                font-size: 20px;
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
-            .cart-panel {
-                max-height: 60vh;
+            .pos-layout {
+                flex-direction: column;
+            }
+            .pos-cart {
+                width: 100%;
+                min-width: unset;
             }
         }
     </style>
@@ -466,438 +609,830 @@
         </div>
     </div>
 
-    <div class="main-container">
-        <!-- Panneau gauche : Produits -->
-        <div class="products-panel">
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="🔍 Rechercher (code, nom, catégorie...)" oninput="searchProducts()">
-                <button class="btn-search" onclick="searchProducts()">🔍</button>
-                <button class="btn-reset" onclick="resetSearch()">✕</button>
+    <div class="main-app">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-section">
+                <div class="nav-section-label">Dashboard</div>
+                <div class="nav-item active" onclick="showPage('pos', this)">
+                    <span class="icon">🛒</span> Caisse POS
+                </div>
+                <div class="nav-item" onclick="showPage('dashboard', this)">
+                    <span class="icon">📊</span> Tableau de bord
+                </div>
             </div>
-
-            <div class="categories-filter" id="categoriesFilter">
-                <button class="active" data-cat="all" onclick="filterByCategory('all', this)">📋 Tous</button>
+            <div class="nav-section">
+                <div class="nav-section-label">Service</div>
+                <div class="nav-item" onclick="showPage('tables', this)">
+                    <span class="icon">🪑</span> Plan des tables
+                </div>
+                <div class="nav-item" onclick="showPage('reservations', this)">
+                    <span class="icon">📅</span> Réservations
+                </div>
+                <div class="nav-item" onclick="showPage('factures', this)">
+                    <span class="icon">🧾</span> Factures
+                </div>
             </div>
-
-            <div class="products-grid" id="productsGrid">
-                <div class="loading">Chargement des produits...</div>
+            <div class="nav-section">
+                <div class="nav-section-label">Gestion</div>
+                <div class="nav-item" onclick="showPage('produits', this)">
+                    <span class="icon">🍕</span> Produits & Menu
+                </div>
+                <div class="nav-item" onclick="showPage('clients', this)">
+                    <span class="icon">👥</span> Clients
+                </div>
+                <div class="nav-item" onclick="showPage('financier', this)">
+                    <span class="icon">💰</span> État financier
+                </div>
             </div>
         </div>
 
-        <!-- Panneau droit : Panier -->
-        <div class="cart-panel">
-            <div class="cart-header">
-                <div>
-                    <span>🛒 Commande</span>
-                    <span class="table-info" id="tableInfo">Table #1</span>
+        <!-- Contenu -->
+        <div class="content">
+            <!-- Page POS -->
+            <div class="page active" id="page-pos">
+                <div class="pos-layout">
+                    <div class="pos-products">
+                        <div class="card">
+                            <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+                                <input type="text" id="posSearch" placeholder="🔍 Rechercher (code: BOI, VIN, PLA...)" style="flex:1; padding:10px 14px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px;" oninput="posSearch()">
+                                <button class="btn btn-primary btn-sm" onclick="posSearch()">🔍</button>
+                                <button class="btn btn-danger btn-sm" onclick="posReset()">✕</button>
+                            </div>
+                            <div class="categories-filter" id="posCategories"></div>
+                            <div class="products-grid" id="posProducts">
+                                <div style="text-align:center;padding:40px;color:#999;">⏳ Chargement des produits...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pos-cart">
+                        <div class="card" style="flex:1; display:flex; flex-direction:column;">
+                            <div class="cart-header">
+                                <div>
+                                    <strong>🛒 Commande</strong>
+                                    <span style="font-size:13px;color:#888;" id="posTableInfo">Table #1</span>
+                                </div>
+                                <button class="btn btn-danger btn-sm" onclick="posNewOrder()">➕ Nouvelle</button>
+                            </div>
+                            <div class="cart-totals">
+                                <div class="total-line">
+                                    <span>📊 Sous-total</span>
+                                    <span class="value subtotal-value" id="posSubtotal">0 FCFA</span>
+                                </div>
+                                <div class="total-line">
+                                    <span>📈 TVA (18%)</span>
+                                    <span class="value taxes-value" id="posTaxes">0 FCFA</span>
+                                </div>
+                                <div class="total-line grand-total">
+                                    <span>💰 TOTAL</span>
+                                    <span class="value" id="posTotal">0 FCFA</span>
+                                </div>
+                            </div>
+                            <div class="cart-items" id="posCart">
+                                <div class="empty-cart">
+                                    <div class="icon">🛒</div>
+                                    <p>Sélectionnez des produits</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-success btn-pay" id="posPayBtn" disabled onclick="posPay()">💳 Payer</button>
+                        </div>
+                    </div>
                 </div>
-                <button class="btn-new-order" onclick="newOrder()">➕ Nouvelle</button>
             </div>
 
-            <!-- === TOTAUX EN HAUT (visible immédiatement) === -->
-            <div class="cart-totals-top" id="cartTotalsTop">
-                <div class="total-line sous-total">
-                    <span class="label">📊 Sous-total</span>
-                    <span class="value" id="subtotal">0 FCFA</span>
-                </div>
-                <div class="total-line tva">
-                    <span class="label">📈 TVA (18%)</span>
-                    <span class="value" id="taxes">0 FCFA</span>
-                </div>
-                <div class="total-line grand-total">
-                    <span class="label">💰 TOTAL</span>
-                    <span class="value" id="total">0 FCFA</span>
+            <!-- Page Dashboard -->
+            <div class="page" id="page-dashboard">
+                <h2 style="margin-bottom:16px;">📊 Tableau de bord</h2>
+                <div class="stats-grid" id="dashboardStats"></div>
+                <div class="card">
+                    <div class="card-title">📈 Meilleurs produits du mois</div>
+                    <div id="topProducts"></div>
                 </div>
             </div>
 
-            <!-- Liste des articles -->
-            <div class="cart-items" id="cartItems">
-                <div class="empty-message">
-                    <div class="icon">🛒</div>
-                    <p>Sélectionnez des produits</p>
+            <!-- Page Tables -->
+            <div class="page" id="page-tables">
+                <h2 style="margin-bottom:16px;">🪑 Plan des tables</h2>
+                <div class="stats-grid" id="tablesStats"></div>
+                <div class="card">
+                    <div class="card-title">Tables</div>
+                    <div id="tablesList" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px;"></div>
                 </div>
             </div>
 
-            <!-- Bouton Payer en bas -->
-            <div class="cart-footer">
-                <button class="btn-pay" id="btnPay" disabled onclick="payOrder()">💳 Payer</button>
+            <!-- Page Reservations -->
+            <div class="page" id="page-reservations">
+                <h2 style="margin-bottom:16px;">📅 Réservations</h2>
+                <div class="card">
+                    <div class="card-title">
+                        <span>Réservations du jour</span>
+                        <button class="btn btn-primary btn-sm" onclick="openReservationModal()">➕ Nouvelle</button>
+                    </div>
+                    <div id="reservationsList"></div>
+                </div>
+            </div>
+
+            <!-- Page Factures -->
+            <div class="page" id="page-factures">
+                <h2 style="margin-bottom:16px;">🧾 Factures</h2>
+                <div class="card">
+                    <div class="card-title">Historique des factures</div>
+                    <div id="facturesList"></div>
+                </div>
+            </div>
+
+            <!-- Page Produits -->
+            <div class="page" id="page-produits">
+                <h2 style="margin-bottom:16px;">🍕 Produits & Menu</h2>
+                <div class="card">
+                    <div class="card-title">
+                        <span>Liste des produits</span>
+                        <button class="btn btn-primary btn-sm" onclick="openProductModal()">➕ Nouveau produit</button>
+                    </div>
+                    <div id="produitsList" class="products-grid"></div>
+                </div>
+            </div>
+
+            <!-- Page Clients -->
+            <div class="page" id="page-clients">
+                <h2 style="margin-bottom:16px;">👥 Clients</h2>
+                <div class="card">
+                    <div class="card-title">
+                        <span>Liste des clients</span>
+                        <button class="btn btn-primary btn-sm" onclick="openClientModal()">➕ Nouveau client</button>
+                    </div>
+                    <div id="clientsList"></div>
+                </div>
+            </div>
+
+            <!-- Page Financier -->
+            <div class="page" id="page-financier">
+                <h2 style="margin-bottom:16px;">💰 État financier</h2>
+                <div class="card">
+                    <div class="card-title">Période</div>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+                        <div><label style="font-size:12px;color:#666;">Date début</label><input type="date" id="finDebut" style="padding:8px 12px; border:2px solid #e0e0e0; border-radius:8px; display:block;"></div>
+                        <div><label style="font-size:12px;color:#666;">Date fin</label><input type="date" id="finFin" style="padding:8px 12px; border:2px solid #e0e0e0; border-radius:8px; display:block;"></div>
+                        <button class="btn btn-primary" onclick="loadFinancier()">🔍 Générer</button>
+                    </div>
+                </div>
+                <div id="financierResults"></div>
             </div>
         </div>
     </div>
 
-    <!-- Toast notification -->
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Titre</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
         // ==================== ÉTAT ====================
         let state = {
-            products: [],
-            categories: [],
             cart: [],
             currentFactureId: null,
             currentTable: 1,
-            searchTerm: '',
-            selectedCategory: 'all',
-            isLoading: false
+            produits: [],
+            categories: [],
+            clients: [],
+            tables: [],
+            reservations: [],
+            factures: []
         };
 
         // ==================== TOAST ====================
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = 'toast ' + type + ' show';
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+        function showToast(msg, type='info') {
+            const t=document.getElementById('toast');
+            t.textContent=msg;
+            t.className='toast '+type+' show';
+            clearTimeout(t._timeout);
+            t._timeout=setTimeout(()=>t.classList.remove('show'),3000);
         }
 
-        // ==================== INIT ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCategories();
-            loadProducts();
-            updateClock();
-            setInterval(updateClock, 1000);
-            setTimeout(() => newOrder(), 500);
+        // ==================== MODAL ====================
+        function openModal(title, html) {
+            document.getElementById('modalTitle').textContent=title;
+            document.getElementById('modalBody').innerHTML=html;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+        document.getElementById('modalOverlay').addEventListener('click', function(e){
+            if(e.target===this) closeModal();
         });
 
+        // ==================== NAVIGATION ====================
+        function showPage(page, el) {
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            document.getElementById('page-'+page).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+            if(el) el.classList.add('active');
+            if(page==='dashboard') loadDashboard();
+            if(page==='tables') loadTables();
+            if(page==='reservations') loadReservations();
+            if(page==='factures') loadFactures();
+            if(page==='produits') loadProduits();
+            if(page==='clients') loadClients();
+            if(page==='financier') loadFinancier();
+            if(page==='pos') { posLoadCategories(); posLoadProducts(); }
+        }
+
         // ==================== API ====================
-        async function apiCall(url, options = {}) {
+        async function apiCall(url, opts={}) {
             try {
-                const response = await fetch(url, {
-                    headers: { 'Content-Type': 'application/json' },
-                    ...options
+                const res=await fetch(url, {
+                    headers:{'Content-Type':'application/json'},
+                    ...opts
                 });
-                const data = await response.json();
-                if (!data.success && !response.ok) {
-                    throw new Error(data.error || 'Erreur API');
-                }
+                const data=await res.json();
+                if(!data.success && !res.ok) throw new Error(data.error||'Erreur API');
                 return data;
-            } catch (error) {
-                console.error('API Error:', error);
-                showToast(error.message, 'error');
-                return { success: false, error: error.message };
+            } catch(e) {
+                console.error('API Error:',e);
+                showToast(e.message,'error');
+                return {success:false, error:e.message};
             }
         }
 
-        // ==================== PRODUITS ====================
-        async function loadProducts() {
-            const result = await apiCall('/api/produits');
-            if (result.success) {
-                state.products = result.data;
-                renderProducts();
+        // ==================== POS ====================
+        async function posLoadCategories() {
+            const res=await apiCall('/api/categories');
+            if(res.success) {
+                state.categories=res.data;
+                const container=document.getElementById('posCategories');
+                container.innerHTML='<button class="active" data-cat="all" onclick="posFilterCategory(\'all\',this)">📋 Tous</button>';
+                state.categories.forEach(c=>{
+                    container.innerHTML+=`<button data-cat="${c.id}" onclick="posFilterCategory(${c.id},this)"><span class="color-dot" style="background:${c.couleur}"></span>${c.nom}</button>`;
+                });
             }
         }
 
-        async function searchProducts() {
-            const input = document.getElementById('searchInput');
-            state.searchTerm = input.value.trim();
-            const cat = state.selectedCategory;
-            let url = '/api/produits';
-            const params = new URLSearchParams();
-            if (state.searchTerm) params.append('q', state.searchTerm);
-            if (cat && cat !== 'all') params.append('categorie', cat);
-            if (params.toString()) url += '?' + params.toString();
+        async function posLoadProducts(q='', cat='all') {
+            let url='/api/produits';
+            const params=new URLSearchParams();
+            if(q) params.append('q', q);
+            if(cat && cat!=='all') params.append('categorie', cat);
+            if(params.toString()) url+='?'+params.toString();
             
-            const result = await apiCall(url);
-            if (result.success) {
-                state.products = result.data;
-                renderProducts();
+            console.log('Chargement des produits depuis:', url);
+            const res=await apiCall(url);
+            console.log('Réponse API:', res);
+            
+            if(res.success) {
+                state.produits=res.data;
+                console.log('Nombre de produits:', state.produits.length);
+                posRenderProducts();
+            } else {
+                document.getElementById('posProducts').innerHTML='<div style="text-align:center;padding:40px;color:#e74c3c;">❌ Erreur de chargement: '+(res.error||'Inconnu')+'</div>';
             }
         }
 
-        function resetSearch() {
-            document.getElementById('searchInput').value = '';
-            state.searchTerm = '';
-            state.selectedCategory = 'all';
-            document.querySelectorAll('.categories-filter button').forEach(b => b.classList.remove('active'));
-            document.querySelector('.categories-filter button[data-cat="all"]').classList.add('active');
-            loadProducts();
-        }
-
-        function filterByCategory(catId, btn) {
-            document.querySelectorAll('.categories-filter button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            state.selectedCategory = catId;
-            searchProducts();
-        }
-
-        function renderProducts() {
-            const grid = document.getElementById('productsGrid');
-            if (!state.products || state.products.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-message">
-                        <div class="icon">🔍</div>
-                        <p>Aucun produit trouvé</p>
-                        <p style="font-size:12px;color:#bbb;">Essayez "BOI" ou "VIN"</p>
-                    </div>
-                `;
+        function posRenderProducts() {
+            const grid=document.getElementById('posProducts');
+            if(!state.produits || !state.produits.length) {
+                grid.innerHTML='<div style="text-align:center;padding:40px;color:#999;">🔍 Aucun produit trouvé<br><span style="font-size:12px;color:#bbb;">Essayez "BOI" ou "VIN"</span></div>';
                 return;
             }
-            
-            grid.innerHTML = state.products.map(p => `
-                <div class="product-card" onclick="addToCart(${p.id}, '${p.nom.replace(/'/g, "\\'")}', ${p.prix})">
-                    <div class="code">${p.code}</div>
-                    <div class="name">${p.nom}</div>
-                    <div class="price">${formatPrice(p.prix)}</div>
-                    ${p.cat_nom ? `<span class="category-tag" style="background:${p.cat_couleur || '#888'}">${p.cat_nom}</span>` : ''}
-                    <div class="stock">📦 ${p.stock || 0} ${p.unite || ''}</div>
+            grid.innerHTML=state.produits.map(p=>{
+                const prix = parseFloat(p.prix) || 0;
+                const catNom = p.cat_nom || p.categorie_nom || '';
+                const catCouleur = p.cat_couleur || '#888';
+                const imageUrl = p.image_url || '';
+                return `
+                <div class="product-card" onclick="posAddToCart(${p.id}, '${p.nom.replace(/'/g,"\\'")}', ${prix})">
+                    <div class="product-image">${imageUrl ? `<img src="${imageUrl}">` : '🍽️'}</div>
+                    <div class="product-code">${p.code || ''}</div>
+                    <div class="product-name">${p.nom || ''}</div>
+                    <div class="product-price">${prix.toLocaleString()} FCFA</div>
+                    ${catNom ? `<div class="product-category" style="background:${catCouleur}">${catNom}</div>` : ''}
+                    <div class="product-stock">📦 ${p.stock || 0} ${p.unite || ''}</div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
-        // ==================== CATÉGORIES ====================
-        async function loadCategories() {
-            const result = await apiCall('/api/categories');
-            if (result.success) {
-                state.categories = result.data;
-                renderCategories();
+        function posSearch() {
+            const q=document.getElementById('posSearch').value.trim();
+            const activeCat=document.querySelector('#posCategories .active');
+            const cat=activeCat ? activeCat.dataset.cat : 'all';
+            posLoadProducts(q, cat);
+        }
+
+        function posReset() {
+            document.getElementById('posSearch').value='';
+            document.querySelectorAll('#posCategories button').forEach(b=>b.classList.remove('active'));
+            document.querySelector('#posCategories button[data-cat="all"]').classList.add('active');
+            posLoadProducts();
+        }
+
+        function posFilterCategory(catId, btn) {
+            document.querySelectorAll('#posCategories button').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            const q=document.getElementById('posSearch').value.trim();
+            posLoadProducts(q, catId);
+        }
+
+        async function posAddToCart(id, nom, prix) {
+            if(!state.currentFactureId) {
+                const ok=await posNewOrder();
+                if(!ok) return;
             }
-        }
-
-        function renderCategories() {
-            const container = document.getElementById('categoriesFilter');
-            const allBtn = container.querySelector('button[data-cat="all"]');
-            container.innerHTML = '';
-            container.appendChild(allBtn);
+            const existing=state.cart.find(i=>i.productId===id);
+            if(existing) existing.quantity++;
+            else state.cart.push({productId:id, nom, prix, quantity:1});
             
-            state.categories.forEach(c => {
-                const btn = document.createElement('button');
-                btn.dataset.cat = c.id;
-                btn.innerHTML = `<span class="color-dot" style="background:${c.couleur}"></span>${c.nom}`;
-                btn.onclick = () => filterByCategory(c.id, btn);
-                container.appendChild(btn);
+            const res=await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
+                method:'POST',
+                body:JSON.stringify({produit_id:id, quantite:1})
             });
-        }
-
-        // ==================== PANIER ====================
-        async function addToCart(productId, name, price) {
-            if (!state.currentFactureId) {
-                const ok = await newOrder();
-                if (!ok) {
-                    showToast('Impossible de créer une commande', 'error');
-                    return;
-                }
-            }
-
-            const existing = state.cart.find(item => item.productId === productId);
-            if (existing) {
-                existing.quantity += 1;
+            if(res.success) {
+                posRenderCart();
+                if(res.totaux) posUpdateTotals(res.totaux.sous_total, res.totaux.taxes, res.totaux.total);
+                showToast(nom+' ajouté !','success');
             } else {
-                state.cart.push({ productId, name, price, quantity: 1 });
-            }
-
-            const result = await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
-                method: 'POST',
-                body: JSON.stringify({ produit_id: productId, quantite: 1 })
-            });
-            
-            if (result.success) {
-                renderCart();
-                if (result.totaux) {
-                    updateTotals(
-                        parseFloat(result.totaux.sous_total),
-                        parseFloat(result.totaux.taxes),
-                        parseFloat(result.totaux.total)
-                    );
-                }
-                showToast(`${name} ajouté !`, 'success');
-            } else {
-                const idx = state.cart.findIndex(i => i.productId === productId);
-                if (idx !== -1) state.cart.splice(idx, 1);
-                renderCart();
-                showToast('Erreur lors de l\'ajout', 'error');
+                const idx=state.cart.findIndex(i=>i.productId===id);
+                if(idx!==-1) state.cart.splice(idx,1);
+                posRenderCart();
+                showToast('Erreur lors de l\'ajout','error');
             }
         }
 
-        async function updateQuantity(productId, delta) {
-            const item = state.cart.find(i => i.productId === productId);
-            if (!item) return;
-            
-            const newQty = item.quantity + delta;
-            
-            if (newQty <= 0) {
-                state.cart = state.cart.filter(i => i.productId !== productId);
-                await updateFactureItem(productId, 0);
-                showToast(`${item.name} retiré`, 'info');
+        async function posUpdateQty(id, delta) {
+            const item=state.cart.find(i=>i.productId===id);
+            if(!item) return;
+            const newQty=item.quantity+delta;
+            if(newQty<=0) {
+                state.cart=state.cart.filter(i=>i.productId!==id);
+                await posUpdateFactureItem(id,0);
+                showToast(item.nom+' retiré','info');
             } else {
-                item.quantity = newQty;
-                await updateFactureItem(productId, newQty);
+                item.quantity=newQty;
+                await posUpdateFactureItem(id,newQty);
             }
-            
-            renderCart();
-            await refreshTotals();
+            posRenderCart();
+            await posRefreshTotals();
         }
 
-        async function updateFactureItem(productId, quantity) {
-            if (!state.currentFactureId) return;
-            
-            const result = await apiCall(`/api/factures/${state.currentFactureId}`);
-            if (result.success) {
-                const lignes = result.data.lignes || [];
-                const ligne = lignes.find(l => l.produit_id === productId);
-                
-                if (ligne) {
-                    if (quantity <= 0) {
-                        await apiCall(`/api/factures/${state.currentFactureId}/lignes/${ligne.id}`, {
-                            method: 'DELETE'
-                        });
+        async function posUpdateFactureItem(id, qty) {
+            if(!state.currentFactureId) return;
+            const res=await apiCall(`/api/factures/${state.currentFactureId}`);
+            if(res.success) {
+                const lignes=res.data.lignes||[];
+                const ligne=lignes.find(l=>l.produit_id===id);
+                if(ligne) {
+                    if(qty<=0) {
+                        await apiCall(`/api/factures/${state.currentFactureId}/lignes/${ligne.id}`, {method:'DELETE'});
                     } else {
-                        const diff = quantity - ligne.quantite;
-                        if (diff !== 0) {
-                            if (diff > 0) {
+                        const diff=qty-ligne.quantite;
+                        if(diff>0) {
+                            await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
+                                method:'POST',
+                                body:JSON.stringify({produit_id:id, quantite:diff})
+                            });
+                        } else if(diff<0) {
+                            await apiCall(`/api/factures/${state.currentFactureId}/lignes/${ligne.id}`, {method:'DELETE'});
+                            if(qty>0) {
                                 await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
-                                    method: 'POST',
-                                    body: JSON.stringify({ produit_id: productId, quantite: diff })
+                                    method:'POST',
+                                    body:JSON.stringify({produit_id:id, quantite:qty})
                                 });
-                            } else {
-                                await apiCall(`/api/factures/${state.currentFactureId}/lignes/${ligne.id}`, {
-                                    method: 'DELETE'
-                                });
-                                if (quantity > 0) {
-                                    await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
-                                        method: 'POST',
-                                        body: JSON.stringify({ produit_id: productId, quantite: quantity })
-                                    });
-                                }
                             }
                         }
                     }
-                } else if (quantity > 0) {
+                } else if(qty>0) {
                     await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
-                        method: 'POST',
-                        body: JSON.stringify({ produit_id: productId, quantite: quantity })
+                        method:'POST',
+                        body:JSON.stringify({produit_id:id, quantite:qty})
                     });
                 }
             }
         }
 
-        async function refreshTotals() {
-            if (!state.currentFactureId) return;
-            const result = await apiCall(`/api/factures/${state.currentFactureId}`);
-            if (result.success) {
-                const data = result.data;
-                if (data.sous_total !== undefined) {
-                    updateTotals(
-                        parseFloat(data.sous_total),
-                        parseFloat(data.taxes),
-                        parseFloat(data.total)
-                    );
+        async function posRefreshTotals() {
+            if(!state.currentFactureId) return;
+            const res=await apiCall(`/api/factures/${state.currentFactureId}`);
+            if(res.success && res.data.sous_total!==undefined) {
+                posUpdateTotals(res.data.sous_total, res.data.taxes, res.data.total);
+            }
+        }
+
+        function posRenderCart() {
+            const container=document.getElementById('posCart');
+            const btnPay=document.getElementById('posPayBtn');
+            if(!state.cart.length) {
+                container.innerHTML='<div class="empty-cart"><div class="icon">🛒</div><p>Sélectionnez des produits</p></div>';
+                btnPay.disabled=true;
+                posUpdateTotals(0,0,0);
+                return;
+            }
+            container.innerHTML=state.cart.map(item=>`
+                <div class="cart-item">
+                    <div class="item-info">
+                        <div class="item-name">${item.nom}</div>
+                        <div class="item-price">${item.prix.toLocaleString()} FCFA</div>
+                    </div>
+                    <div class="item-qty">
+                        <button onclick="posUpdateQty(${item.productId}, -1)">−</button>
+                        <span class="qty">${item.quantity}</span>
+                        <button onclick="posUpdateQty(${item.productId}, 1)">+</button>
+                    </div>
+                    <div class="item-total">${(item.prix*item.quantity).toLocaleString()} FCFA</div>
+                </div>
+            `).join('');
+            btnPay.disabled=false;
+            const totals=state.cart.reduce((acc,i)=>({subtotal:acc.subtotal+i.prix*i.quantity}), {subtotal:0});
+            const subtotal=totals.subtotal;
+            posUpdateTotals(subtotal, subtotal*0.18, subtotal*1.18);
+        }
+
+        function posUpdateTotals(subtotal, taxes, total) {
+            document.getElementById('posSubtotal').textContent=subtotal.toLocaleString()+' FCFA';
+            document.getElementById('posTaxes').textContent=taxes.toLocaleString()+' FCFA';
+            document.getElementById('posTotal').textContent=total.toLocaleString()+' FCFA';
+        }
+
+        async function posNewOrder() {
+            const res=await apiCall('/api/factures', {
+                method:'POST',
+                body:JSON.stringify({table_id:state.currentTable, utilisateur_id:1})
+            });
+            if(res.success) {
+                state.currentFactureId=res.data.id;
+                state.cart=[];
+                posRenderCart();
+                document.getElementById('posTableInfo').textContent=`Table #${state.currentTable}`;
+                document.getElementById('orderCount').textContent=`#${res.data.numero}`;
+                document.getElementById('posPayBtn').disabled=true;
+                posUpdateTotals(0,0,0);
+                showToast(`Commande ${res.data.numero} créée`,'success');
+                return true;
+            }
+            return false;
+        }
+
+        async function posPay() {
+            if(!state.currentFactureId || !state.cart.length) {
+                showToast('Panier vide','error');
+                return;
+            }
+            const total=document.getElementById('posTotal').textContent;
+            if(!confirm(`Confirmer le paiement de ${total} ?`)) return;
+            const res=await apiCall(`/api/factures/${state.currentFactureId}`, {
+                method:'PUT',
+                body:JSON.stringify({statut:'payée', mode_paiement:'espèces'})
+            });
+            if(res.success) {
+                showToast('✅ Paiement effectué !','success');
+                await posNewOrder();
+                posLoadProducts();
+            }
+        }
+
+        // ==================== DASHBOARD ====================
+        async function loadDashboard() {
+            const res=await apiCall('/api/dashboard');
+            if(res.success) {
+                const s=res.data;
+                document.getElementById('dashboardStats').innerHTML=`
+                    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-number">${Number(s.chiffre_affaires_jour).toLocaleString()} FCFA</div><div class="stat-label">CA du jour</div></div>
+                    <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-number">${s.commandes_jour}</div><div class="stat-label">Commandes du jour</div></div>
+                    <div class="stat-card"><div class="stat-icon">🪑</div><div class="stat-number">${s.tables_occupees}/${s.tables_total}</div><div class="stat-label">Tables occupées</div></div>
+                    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-number">${s.reservations_aujourd_hui}</div><div class="stat-label">Réservations</div></div>
+                    <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-number">${Number(s.ca_semaine).toLocaleString()} FCFA</div><div class="stat-label">CA cette semaine</div></div>
+                    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-number">${Number(s.ca_mois).toLocaleString()} FCFA</div><div class="stat-label">CA ce mois</div></div>
+                `;
+                if(s.top_produits && s.top_produits.length) {
+                    document.getElementById('topProducts').innerHTML=`
+                        <table><thead><tr><th>Produit</th><th>Quantité</th><th>CA</th></tr></thead><tbody>
+                        ${s.top_produits.map(p=>`<tr><td>${p.nom}</td><td>${p.qte}</td><td>${Number(p.ca).toLocaleString()} FCFA</td></tr>`).join('')}
+                        </tbody></table>
+                    `;
+                } else {
+                    document.getElementById('topProducts').innerHTML='<div style="text-align:center;padding:20px;color:#999;">Aucune donnée disponible</div>';
                 }
             }
         }
 
-        function renderCart() {
-            const container = document.getElementById('cartItems');
-            const btnPay = document.getElementById('btnPay');
-            
-            if (state.cart.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-message">
-                        <div class="icon">🛒</div>
-                        <p>Sélectionnez des produits</p>
-                    </div>
+        // ==================== TABLES ====================
+        async function loadTables() {
+            const res=await apiCall('/api/tables');
+            if(res.success) {
+                state.tables=res.data;
+                const total=state.tables.length;
+                const occupees=state.tables.filter(t=>t.statut==='occupée').length;
+                document.getElementById('tablesStats').innerHTML=`
+                    <div class="stat-card"><div class="stat-number">${total}</div><div class="stat-label">Total tables</div></div>
+                    <div class="stat-card"><div class="stat-number">${occupees}</div><div class="stat-label">Occupées</div></div>
+                    <div class="stat-card"><div class="stat-number">${total-occupees}</div><div class="stat-label">Libres</div></div>
                 `;
-                btnPay.disabled = true;
-                updateTotals(0, 0, 0);
+                document.getElementById('tablesList').innerHTML=state.tables.map(t=>`
+                    <div style="background:white;border-radius:10px;padding:16px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);border:2px solid ${t.statut==='occupée'?'#e74c3c':t.statut==='réservée'?'#f39c12':'#27ae60'};">
+                        <div style="font-size:28px;">${t.statut==='occupée'?'🪑':t.statut==='réservée'?'📅':'🪑'}</div>
+                        <div style="font-weight:700;font-size:18px;">${t.numero}</div>
+                        <div style="font-size:12px;color:#888;">${t.zone||'Salle'} - ${t.capacite} pers.</div>
+                        <div style="font-size:11px;margin-top:4px;color:${t.statut==='occupée'?'#e74c3c':t.statut==='réservée'?'#f39c12':'#27ae60'};font-weight:600;">${t.statut.toUpperCase()}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // ==================== RESERVATIONS ====================
+        async function loadReservations() {
+            const res=await apiCall('/api/reservations');
+            if(res.success) {
+                state.reservations=res.data;
+                document.getElementById('reservationsList').innerHTML=state.reservations.length ?
+                    `<table><thead><tr><th>Client</th><th>Table</th><th>Date</th><th>Heure</th><th>Personnes</th><th>Statut</th></tr></thead><tbody>
+                    ${state.reservations.map(r=>`<tr><td>${r.client_nom||'N/A'}</td><td>${r.table_num||'N/A'}</td><td>${r.date_reservation}</td><td>${r.heure_debut}</td><td>${r.nb_personnes}</td><td><span style="padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${r.statut==='confirmée'?'#27ae60':r.statut==='annulée'?'#e74c3c':'#f39c12'};color:white;">${r.statut}</span></td></tr>`).join('')}
+                    </tbody></table>` :
+                    '<div style="text-align:center;padding:20px;color:#999;">Aucune réservation</div>';
+            }
+        }
+
+        function openReservationModal() {
+            openModal('📅 Nouvelle réservation', `
+                <div class="form-group"><label>Client</label><select id="resClient"><option value="">Sélectionner</option></select></div>
+                <div class="form-group"><label>Table</label><select id="resTable"><option value="">Sélectionner</option></select></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Date</label><input type="date" id="resDate"></div>
+                    <div class="form-group"><label>Heure</label><input type="time" id="resHeure"></div>
+                </div>
+                <div class="form-group"><label>Nombre de personnes</label><input type="number" id="resNb" value="2" min="1"></div>
+                <div class="form-group"><label>Notes</label><textarea id="resNotes"></textarea></div>
+                <button class="btn btn-success" onclick="saveReservation()" style="width:100%;">✅ Enregistrer</button>
+            `);
+            apiCall('/api/clients').then(r=>{
+                if(r.success) {
+                    const sel=document.getElementById('resClient');
+                    r.data.forEach(c=>sel.innerHTML+=`<option value="${c.id}">${c.nom} ${c.prenom||''}</option>`);
+                }
+            });
+            apiCall('/api/tables').then(r=>{
+                if(r.success) {
+                    const sel=document.getElementById('resTable');
+                    r.data.forEach(t=>sel.innerHTML+=`<option value="${t.id}">${t.numero} - ${t.zone||'Salle'}</option>`);
+                }
+            });
+            document.getElementById('resDate').valueAsDate=new Date();
+        }
+
+        async function saveReservation() {
+            const data={
+                client_id: document.getElementById('resClient').value || null,
+                table_id: document.getElementById('resTable').value || null,
+                date_reservation: document.getElementById('resDate').value,
+                heure_debut: document.getElementById('resHeure').value+':00',
+                nb_personnes: parseInt(document.getElementById('resNb').value) || 1,
+                notes: document.getElementById('resNotes').value
+            };
+            if(!data.date_reservation || !data.heure_debut) {
+                showToast('Date et heure obligatoires','error');
                 return;
             }
-
-            container.innerHTML = state.cart.map((item, index) => `
-                <div class="cart-item" data-index="${index}">
-                    <div class="item-info">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-price">${formatPrice(item.price)}</div>
-                    </div>
-                    <div class="item-qty">
-                        <button onclick="updateQuantity(${item.productId}, -1)">−</button>
-                        <span class="qty" id="qty-${item.productId}">${item.quantity}</span>
-                        <button onclick="updateQuantity(${item.productId}, 1)">+</button>
-                    </div>
-                    <div class="item-total">${formatPrice(item.price * item.quantity)}</div>
-                </div>
-            `).join('');
-
-            btnPay.disabled = false;
-            const totals = calculateTotals();
-            updateTotals(totals.subtotal, totals.taxes, totals.total);
-        }
-
-        function calculateTotals() {
-            const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const taxes = subtotal * 0.18;
-            const total = subtotal + taxes;
-            return { subtotal, taxes, total };
-        }
-
-        function updateTotals(subtotal, taxes, total) {
-            document.getElementById('subtotal').textContent = formatPrice(subtotal);
-            document.getElementById('taxes').textContent = formatPrice(taxes);
-            document.getElementById('total').textContent = formatPrice(total);
-        }
-
-        function formatPrice(price) {
-            return Number(price).toLocaleString('fr-FR') + ' FCFA';
+            const res=await apiCall('/api/reservations', {
+                method:'POST',
+                body:JSON.stringify(data)
+            });
+            if(res.success) {
+                showToast('Réservation créée !','success');
+                closeModal();
+                loadReservations();
+            }
         }
 
         // ==================== FACTURES ====================
-        async function newOrder() {
-            try {
-                const result = await apiCall('/api/factures', {
-                    method: 'POST',
-                    body: JSON.stringify({ table_id: state.currentTable, utilisateur_id: 1 })
-                });
-                
-                if (result.success) {
-                    state.currentFactureId = result.data.id;
-                    state.cart = [];
-                    renderCart();
-                    document.getElementById('tableInfo').textContent = `Table #${state.currentTable}`;
-                    document.getElementById('orderCount').textContent = `#${result.data.numero}`;
-                    document.getElementById('btnPay').disabled = true;
-                    updateTotals(0, 0, 0);
-                    showToast(`Commande ${result.data.numero} créée`, 'success');
-                    return true;
-                } else {
-                    showToast('Erreur lors de la création de la commande', 'error');
-                    return false;
-                }
-            } catch (error) {
-                showToast('Erreur: ' + error.message, 'error');
-                return false;
+        async function loadFactures() {
+            const res=await apiCall('/api/factures');
+            if(res.success) {
+                state.factures=res.data;
+                document.getElementById('facturesList').innerHTML=state.factures.length ?
+                    `<table><thead><tr><th>N°</th><th>Table</th><th>Total</th><th>Statut</th><th>Date</th></tr></thead><tbody>
+                    ${state.factures.map(f=>`<tr><td><strong>${f.numero}</strong></td><td>${f.table_num||'N/A'}</td><td>${Number(f.total).toLocaleString()} FCFA</td><td><span style="padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${f.statut==='payée'?'#27ae60':'#f39c12'};color:white;">${f.statut}</span></td><td>${f.created_at?f.created_at.split(' ')[0]:''}</td></tr>`).join('')}
+                    </tbody></table>` :
+                    '<div style="text-align:center;padding:20px;color:#999;">Aucune facture</div>';
             }
         }
 
-        async function payOrder() {
-            if (!state.currentFactureId || state.cart.length === 0) {
-                showToast('Panier vide', 'error');
+        // ==================== PRODUITS ====================
+        async function loadProduits() {
+            const res=await apiCall('/api/produits');
+            if(res.success) {
+                state.produits=res.data;
+                document.getElementById('produitsList').innerHTML=state.produits.map(p=>`
+                    <div class="product-card" style="cursor:default;">
+                        <div class="product-image">${p.image_url ? `<img src="${p.image_url}">` : '🍽️'}</div>
+                        <div class="product-code">${p.code}</div>
+                        <div class="product-name">${p.nom}</div>
+                        <div class="product-price">${Number(p.prix).toLocaleString()} FCFA</div>
+                        ${p.cat_nom ? `<div class="product-category" style="background:${p.cat_couleur || '#888'}">${p.cat_nom}</div>` : ''}
+                        <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;">
+                            <button class="btn btn-warning btn-sm" onclick="editProduct(${p.id})">✏️</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function openProductModal(data={}) {
+            const isEdit=!!data.id;
+            openModal(isEdit?'✏️ Modifier le produit':'➕ Nouveau produit', `
+                <div class="form-group"><label>Nom</label><input id="prodNom" value="${data.nom||''}"></div>
+                <div class="form-group"><label>Description</label><textarea id="prodDesc">${data.description||''}</textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Prix</label><input type="number" id="prodPrix" value="${data.prix||''}"></div>
+                    <div class="form-group"><label>Prix achat</label><input type="number" id="prodAchat" value="${data.prix_achat||''}"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Catégorie</label><select id="prodCategorie"></select></div>
+                    <div class="form-group"><label>Stock</label><input type="number" id="prodStock" value="${data.stock||0}"></div>
+                </div>
+                <div class="form-group"><label>Unité</label><input id="prodUnite" value="${data.unite||'portion'}"></div>
+                <div class="form-group"><label>Image URL</label><input id="prodImage" value="${data.image_url||''}" placeholder="https://exemple.com/image.jpg"></div>
+                <button class="btn btn-success" onclick="saveProduct(${data.id||0})" style="width:100%;">✅ Enregistrer</button>
+            `);
+            apiCall('/api/categories').then(r=>{
+                if(r.success) {
+                    const sel=document.getElementById('prodCategorie');
+                    r.data.forEach(c=>sel.innerHTML+=`<option value="${c.id}" ${c.id==data.categorie_id?'selected':''}>${c.nom}</option>`);
+                }
+            });
+        }
+
+        async function saveProduct(id) {
+            const data={
+                nom: document.getElementById('prodNom').value,
+                description: document.getElementById('prodDesc').value,
+                prix: parseFloat(document.getElementById('prodPrix').value) || 0,
+                prix_achat: parseFloat(document.getElementById('prodAchat').value) || 0,
+                categorie_id: parseInt(document.getElementById('prodCategorie').value) || null,
+                stock: parseInt(document.getElementById('prodStock').value) || 0,
+                unite: document.getElementById('prodUnite').value || 'portion',
+                image_url: document.getElementById('prodImage').value || null
+            };
+            if(!data.nom || !data.prix) {
+                showToast('Nom et prix obligatoires','error');
                 return;
             }
-            
-            const total = document.getElementById('total').textContent;
-            if (!confirm(`Confirmer le paiement de ${total} ?`)) return;
-            
-            const result = await apiCall(`/api/factures/${state.currentFactureId}`, {
-                method: 'PUT',
-                body: JSON.stringify({ 
-                    statut: 'payée', 
-                    mode_paiement: 'espèces' 
-                })
-            });
-            
-            if (result.success) {
-                showToast('✅ Paiement effectué avec succès !', 'success');
-                await newOrder();
-            } else {
-                showToast('❌ Erreur lors du paiement', 'error');
+            const url=id ? `/api/produits/${id}` : '/api/produits';
+            const method=id ? 'PUT' : 'POST';
+            const res=await apiCall(url, {method, body:JSON.stringify(data)});
+            if(res.success) {
+                showToast(id?'Produit modifié !':'Produit créé !','success');
+                closeModal();
+                loadProduits();
+                posLoadProducts();
             }
         }
 
-        // ==================== HORLOGE ====================
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('fr-FR');
+        async function deleteProduct(id) {
+            if(!confirm('Supprimer ce produit ?')) return;
+            const res=await apiCall(`/api/produits/${id}`, {method:'DELETE'});
+            if(res.success) {
+                showToast('Produit supprimé','info');
+                loadProduits();
+                posLoadProducts();
+            }
         }
+
+        // ==================== CLIENTS ====================
+        async function loadClients() {
+            const res=await apiCall('/api/clients');
+            if(res.success) {
+                state.clients=res.data;
+                document.getElementById('clientsList').innerHTML=state.clients.length ?
+                    `<table><thead><tr><th>Nom</th><th>Prénom</th><th>Téléphone</th><th>Email</th><th>Actions</th></tr></thead><tbody>
+                    ${state.clients.map(c=>`<tr><td><strong>${c.nom}</strong></td><td>${c.prenom||''}</td><td>${c.telephone||''}</td><td>${c.email||''}</td><td>
+                        <button class="btn btn-warning btn-sm" onclick="editClient(${c.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteClient(${c.id})">🗑️</button>
+                    </td></tr>`).join('')}
+                    </tbody></table>` :
+                    '<div style="text-align:center;padding:20px;color:#999;">Aucun client</div>';
+            }
+        }
+
+        function openClientModal(data={}) {
+            const isEdit=!!data.id;
+            openModal(isEdit?'✏️ Modifier le client':'➕ Nouveau client', `
+                <div class="form-row">
+                    <div class="form-group"><label>Nom</label><input id="clientNom" value="${data.nom||''}"></div>
+                    <div class="form-group"><label>Prénom</label><input id="clientPrenom" value="${data.prenom||''}"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Téléphone</label><input id="clientTel" value="${data.telephone||''}"></div>
+                    <div class="form-group"><label>Email</label><input id="clientEmail" value="${data.email||''}"></div>
+                </div>
+                <div class="form-group"><label>Adresse</label><textarea id="clientAdresse">${data.adresse||''}</textarea></div>
+                <div class="form-group"><label>Notes</label><textarea id="clientNotes">${data.notes||''}</textarea></div>
+                <button class="btn btn-success" onclick="saveClient(${data.id||0})" style="width:100%;">✅ Enregistrer</button>
+            `);
+        }
+
+        async function saveClient(id) {
+            const data={
+                nom: document.getElementById('clientNom').value,
+                prenom: document.getElementById('clientPrenom').value,
+                telephone: document.getElementById('clientTel').value,
+                email: document.getElementById('clientEmail').value,
+                adresse: document.getElementById('clientAdresse').value,
+                notes: document.getElementById('clientNotes').value
+            };
+            if(!data.nom) {
+                showToast('Nom obligatoire','error');
+                return;
+            }
+            const url=id ? `/api/clients/${id}` : '/api/clients';
+            const method=id ? 'PUT' : 'POST';
+            const res=await apiCall(url, {method, body:JSON.stringify(data)});
+            if(res.success) {
+                showToast(id?'Client modifié !':'Client créé !','success');
+                closeModal();
+                loadClients();
+            }
+        }
+
+        async function deleteClient(id) {
+            if(!confirm('Supprimer ce client ?')) return;
+            const res=await apiCall(`/api/clients/${id}`, {method:'DELETE'});
+            if(res.success) {
+                showToast('Client supprimé','info');
+                loadClients();
+            }
+        }
+
+        // ==================== FINANCIER ====================
+        async function loadFinancier() {
+            const debut=document.getElementById('finDebut').value;
+            const fin=document.getElementById('finFin').value;
+            let url='/api/financier';
+            const params=new URLSearchParams();
+            if(debut) params.append('debut', debut);
+            if(fin) params.append('fin', fin);
+            if(params.toString()) url+='?'+params.toString();
+            
+            const res=await apiCall(url);
+            if(res.success) {
+                const d=res.data;
+                document.getElementById('financierResults').innerHTML=`
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-number">${Number(d.revenus.total||0).toLocaleString()} FCFA</div><div class="stat-label">CA total</div></div>
+                        <div class="stat-card"><div class="stat-number">${Number(d.revenus.ht||0).toLocaleString()} FCFA</div><div class="stat-label">HT</div></div>
+                        <div class="stat-card"><div class="stat-number">${Number(d.revenus.tva||0).toLocaleString()} FCFA</div><div class="stat-label">TVA</div></div>
+                        <div class="stat-card"><div class="stat-number">${d.revenus.nb_factures||0}</div><div class="stat-label">Factures</div></div>
+                    </div>
+                    ${d.par_mode && d.par_mode.length ? `
+                    <div class="card"><div class="card-title">💰 Par mode de paiement</div>
+                    <table><thead><tr><th>Mode</th><th>Nombre</th><th>Montant</th></tr></thead><tbody>
+                    ${d.par_mode.map(m=>`<tr><td>${m.mode_paiement}</td><td>${m.nb}</td><td>${Number(m.montant).toLocaleString()} FCFA</td></tr>`).join('')}
+                    </tbody></table></div>` : ''}
+                    ${d.top_produits && d.top_produits.length ? `
+                    <div class="card"><div class="card-title">🏆 Top produits</div>
+                    <table><thead><tr><th>Produit</th><th>Quantité</th><th>CA</th></tr></thead><tbody>
+                    ${d.top_produits.map(p=>`<tr><td>${p.nom}</td><td>${p.qte}</td><td>${Number(p.ca).toLocaleString()} FCFA</td></tr>`).join('')}
+                    </tbody></table></div>` : ''}
+                `;
+            }
+        }
+
+        // ==================== EDIT FUNCTIONS ====================
+        function editProduct(id) {
+            const p=state.produits.find(p=>p.id===id);
+            if(p) openProductModal(p);
+        }
+
+        function editClient(id) {
+            const c=state.clients.find(c=>c.id===id);
+            if(c) openClientModal(c);
+        }
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Horloge
+            function updateClock() {
+                document.getElementById('currentTime').textContent=new Date().toLocaleTimeString('fr-FR');
+            }
+            updateClock();
+            setInterval(updateClock,1000);
+            
+            // Charger POS
+            posLoadCategories();
+            posLoadProducts();
+            setTimeout(posNewOrder,500);
+            
+            // Dates financier
+            const now=new Date();
+            const firstDay=new Date(now.getFullYear(), now.getMonth(), 1);
+            document.getElementById('finDebut').value=firstDay.toISOString().split('T')[0];
+            document.getElementById('finFin').value=now.toISOString().split('T')[0];
+        });
     </script>
 </body>
 </html>
