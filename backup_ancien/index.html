@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RestauManager Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --noir:#0d0d0f; --noir-2:#14141a; --noir-3:#1c1c26; --ambre:#f5a623; --texte:#e8e8f0; --bordure:rgba(255,255,255,0.07); --radius-lg:18px; }
+body { font-family: 'Inter', sans-serif; background: var(--noir); color: var(--texte); display: flex; height: 100vh; margin: 0; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 24px; }
+.product-card { background: var(--noir-3); border: 1px solid var(--bordure); padding: 14px; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+.product-card:hover { border-color: var(--ambre); }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+.search-bar input { width: 100%; padding: 12px; background: var(--noir-2); border: 1px solid var(--bordure); color: white; border-radius: 8px; box-sizing: border-box; }
+.product-name { font-weight: 600; margin-bottom: 4px; }
+.product-price { color: var(--ambre); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="main">
+  <h1>Caisse POS</h1>
+  <div class="search-bar">
+    <input type="text" id="pos-search" placeholder="Rechercher un produit (vin, boi...)" oninput="filterProducts()">
+  </div>
+  <div class="products-grid" id="pos-products">Chargement des produits...</div>
+</div>
+
+<script>
+const API = './api/index.php';
+let allProduits = [];
+
+// --- API HELPER CORRIGÉ ---
+async function api(action, method = 'GET', body = null) {
+  try {
+    const url = `${API}?action=${action}`;
+    const opts = { 
+        method, 
+        headers: { 'Content-Type': 'application/json' } 
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    return await res.json();
+  } catch (e) {
+    console.error("Erreur API:", e);
+    return { success: false, data: [] };
+  }
+}
+
+// --- CHARGEMENT CORRIGÉ ---
+async function loadPOSProducts() {
+  const r = await api('produits');
+  console.log("Données reçues :", r);
+  
+  if (r && r.success && Array.isArray(r.data)) {
+    allProduits = r.data;
+    renderPOSProducts(allProduits);
+  } else {
+    document.getElementById('pos-products').innerHTML = 
+      '<div style="color:red;padding:20px">Erreur : Impossible de charger les produits.</div>';
+  }
+}
+
+function filterProducts() {
+  const input = document.getElementById('pos-search');
+  if (!input) return;
+  const q = input.value.toLowerCase().trim();
+  
+  if (q === "") {
+    renderPOSProducts(allProduits);
+    return;
+  }
+
+  const filtered = allProduits.filter(p => {
+    const nom = (p.nom || "").toLowerCase();
+    const code = (p.code || "").toLowerCase();
+    return nom.includes(q) || code.includes(q);
+  });
+  renderPOSProducts(filtered);
+}
+
+function renderPOSProducts(prods) {
+  const el = document.getElementById('pos-products');
+  if (!el) return;
+  el.innerHTML = prods.map(p => `
+    <div class="product-card" onclick="addToCart(${p.id})">
+      <div class="product-name">${p.nom}</div>
+      <div class="product-code">${p.code||'–'}</div>
+      <div class="product-price">${p.prix} FCFA</div>
+    </div>`).join('') || '<div style="padding:40px;text-align:center">Aucun produit trouvé</div>';
+}
+
+function addToCart(id) { console.log("Ajout produit:", id); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadPOSProducts();
+});
+</script>
+</body>
+</html>

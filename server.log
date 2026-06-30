@@ -1,0 +1,29 @@
+[Tue Jun 30 03:02:30 2026] PHP 8.3.6 Development Server (http://0.0.0.0:8080) started
+[Tue Jun 30 03:02:48 2026] 127.0.0.1:54040 Accepted
+[Tue Jun 30 03:02:48 2026] 127.0.0.1:54040 Closing
+[Tue Jun 30 03:02:49 2026] 127.0.0.1:54044 Accepted
+[Tue Jun 30 03:02:49 2026] 127.0.0.1:54046 Accepted
+[Tue Jun 30 03:02:49 2026] PHP Fatal error:  'break' not in the 'loop' or 'switch' context in /root/restau_design/api/index.php on line 100
+[Tue Jun 30 03:02:49 2026] 127.0.0.1:54044 Closing
+[Tue Jun 30 03:02:49 2026] PHP Fatal error:  'break' not in the 'loop' or 'switch' context in /root/restau_design/api/index.php on line 100
+[Tue Jun 30 03:02:49 2026] 127.0.0.1:54046 Closing
+[Tue Jun 30 03:04:02 2026] 127.0.0.1:54060 Accepted
+[Tue Jun 30 03:04:02 2026] 127.0.0.1:54062 Accepted
+[Tue Jun 30 03:04:02 2026] PHP Fatal error:  'break' not in the 'loop' or 'switch' context in /root/restau_design/api/index.php on line 100
+[Tue Jun 30 03:04:02 2026] 127.0.0.1:54060 Closing
+[Tue Jun 30 03:04:02 2026] 127.0.0.1:54064 Accepted
+[Tue Jun 30 03:04:02 2026] 127.0.0.1:54062 Closing
+[Tue Jun 30 03:04:13 2026] PHP Fatal error:  'break' not in the 'loop' or 'switch' context in /root/restau_design/api/index.php on line 100
+[Tue Jun 30 03:04:13 2026] 127.0.0.1:54064 Closing
+[Tue Jun 30 03:05:54 2026] 127.0.0.1:54304 Accepted
+[Tue Jun 30 03:05:54 2026] PHP Fatal error:  'break' not in the 'loop' or 'switch' context in /root/restau_design/api/index.php on line 144
+[Tue Jun 30 03:05:54 2026] 127.0.0.1:54304 Closing
+[Tue Jun 30 03:05:54 2026] 127.0.0.1:54308 Accepted
+[Tue Jun 30 03:05:54 2026] PHP Fatal error:  'break' not in the 'loop' or 'switch' context in /root/restau_design/api/index.php on line 144
+[Tue Jun 30 03:05:54 2026] 127.0.0.1:54308 Closing
+[Tue Jun 30 03:05:55 2026] 127.0.0.1:54312 Accepted
+[Tue Jun 30 03:05:55 2026] PHP Fatal error:  'break' not in the 'loop' or 'switch' context in /root/restau_design/api/index.php on line 144
+[Tue Jun 30 03:05:55 2026] 127.0.0.1:54312 Closing
+[Tue Jun 30 03:05:55 2026] 127.0.0.1:54316 Accepted
+[Tue Jun 30 03:05:55 2026] PHP Fatal error:  'break' not in the 'loop' or 'switch' context in /root/restau_design/api/index.php on line 144
+[Tue Jun 30 03:05:55 2026] 127.0.0.1:54316 Closing

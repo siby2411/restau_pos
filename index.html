@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RestauManager - POS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .header h1 { font-size: 18px; font-weight: 600; }
+        .header .time { font-size: 14px; opacity: 0.8; }
+        .header .badge { 
+            background: #e94560; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 12px;
+        }
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+            gap: 0;
+        }
+        .products-panel {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        .search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            min-width: 150px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+        .search-bar input:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+        .search-bar input::placeholder { color: #999; }
+        .search-bar .btn-search {
+            padding: 12px 20px;
+            background: #4a90d9;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .search-bar .btn-search:active { transform: scale(0.95); }
+        .search-bar .btn-reset {
+            padding: 12px 16px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .categories-filter {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            padding: 4px 0;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        .categories-filter button {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            background: white;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.2s;
+        }
+        .categories-filter button.active {
+            background: #4a90d9;
+            color: white;
+            border-color: #4a90d9;
+        }
+        .categories-filter button:active { transform: scale(0.95); }
+        .categories-filter .color-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.15s;
+            touch-action: manipulation;
+            border: 2px solid transparent;
+            position: relative;
+        }
+        .product-card:active {
+            transform: scale(0.96);
+            border-color: #4a90d9;
+            background: #f0f7ff;
+        }
+        .product-card .code { font-size: 11px; color: #888; font-weight: 600; }
+        .product-card .name { font-size: 14px; font-weight: 600; margin: 4px 0; color: #1a1a2e; }
+        .product-card .price { font-size: 16px; font-weight: 700; color: #e94560; }
+        .product-card .category-tag {
+            display: inline-block;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            color: white;
+            margin-top: 4px;
+        }
+        .product-card .stock { font-size: 10px; color: #888; margin-top: 4px; }
+        .cart-panel {
+            width: 380px;
+            min-width: 320px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #e0e0e0;
+            max-height: calc(100vh - 60px);
+        }
+        .cart-header {
+            padding: 12px 16px;
+            background: #1a1a2e;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .cart-header .table-info { font-size: 14px; }
+        .cart-header .btn-new-order {
+            padding: 6px 16px;
+            background: #e94560;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .cart-header .btn-new-order:active { transform: scale(0.95); }
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 16px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .cart-item .item-info { flex: 1; }
+        .cart-item .item-name { font-weight: 600; font-size: 14px; }
+        .cart-item .item-price { color: #666; font-size: 13px; }
+        .cart-item .item-qty {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cart-item .item-qty button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            background: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cart-item .item-qty button:active { transform: scale(0.9); background: #f0f0f0; }
+        .cart-item .item-qty .qty { font-weight: 600; min-width: 24px; text-align: center; }
+        .cart-item .item-total { font-weight: 700; color: #e94560; min-width: 70px; text-align: right; }
+        .cart-footer {
+            padding: 12px 16px;
+            border-top: 2px solid #e0e0e0;
+            background: #f8f9fa;
+            flex-shrink: 0;
+        }
+        .cart-footer .total-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 14px;
+        }
+        .cart-footer .total-line.grand-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 8px;
+            margin-top: 4px;
+        }
+        .cart-footer .total-line .label { color: #666; }
+        .cart-footer .total-line .value { font-weight: 600; }
+        .cart-footer .btn-pay {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            touch-action: manipulation;
+        }
+        .cart-footer .btn-pay:active { transform: scale(0.98); }
+        .cart-footer .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; }
+        .empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        .empty-message .icon { font-size: 48px; margin-bottom: 12px; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; height: auto; }
+            .products-panel { height: 50vh; }
+            .cart-panel { 
+                width: 100%; 
+                min-width: unset; 
+                max-height: 50vh;
+                border-left: none;
+                border-top: 1px solid #e0e0e0;
+            }
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            .search-bar input { font-size: 14px; padding: 10px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🍽️ RestauManager POS</h1>
+        <div>
+            <span class="time" id="currentTime"></span>
+            <span class="badge" id="orderCount">0 commande</span>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="products-panel">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Rechercher (code, nom, catégorie...)" oninput="searchProducts()">
+                <button class="btn-search" onclick="searchProducts()">Rechercher</button>
+                <button class="btn-reset" onclick="resetSearch()">✕</button>
+            </div>
+
+            <div class="categories-filter" id="categoriesFilter">
+                <button class="active" data-cat="all" onclick="filterByCategory('all', this)">📋 Tous</button>
+            </div>
+
+            <div class="products-grid" id="productsGrid">
+                <div class="loading">Chargement des produits...</div>
+            </div>
+        </div>
+
+        <div class="cart-panel">
+            <div class="cart-header">
+                <div>
+                    <span>🛒 Commande</span>
+                    <span class="table-info" id="tableInfo">Table #1</span>
+                </div>
+                <button class="btn-new-order" onclick="newOrder()">➕ Nouvelle</button>
+            </div>
+
+            <div class="cart-items" id="cartItems">
+                <div class="empty-message">
+                    <div class="icon">🛒</div>
+                    <p>Sélectionnez des produits</p>
+                </div>
+            </div>
+
+            <div class="cart-footer">
+                <div class="total-line">
+                    <span class="label">Sous-total</span>
+                    <span class="value" id="subtotal">0 FCFA</span>
+                </div>
+                <div class="total-line">
+                    <span class="label">TVA (18%)</span>
+                    <span class="value" id="taxes">0 FCFA</span>
+                </div>
+                <div class="total-line grand-total">
+                    <span class="label">TOTAL</span>
+                    <span class="value" id="total">0 FCFA</span>
+                </div>
+                <button class="btn-pay" id="btnPay" disabled onclick="payOrder()">💳 Payer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== ÉTAT ====================
+        let state = {
+            products: [],
+            categories: [],
+            cart: [],
+            currentFactureId: null,
+            currentTable: 1,
+            searchTerm: '',
+            selectedCategory: 'all',
+            isLoading: false
+        };
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCategories();
+            loadProducts();
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            // Démarrer avec une nouvelle commande
+            setTimeout(() => newOrder(), 500);
+        });
+
+        // ==================== API ====================
+        async function apiCall(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Content-Type': 'application/json' },
+                    ...options
+                });
+                const data = await response.json();
+                if (!data.success && !response.ok) {
+                    throw new Error(data.error || 'Erreur API');
+                }
+                return data;
+            } catch (error) {
+                console.error('API Error:', error);
+                showError(error.message);
+                return { success: false, error: error.message };
+            }
+        }
+
+        function showError(msg) {
+            alert('❌ ' + msg);
+        }
+
+        // ==================== PRODUITS ====================
+        async function loadProducts() {
+            const result = await apiCall('/api/produits');
+            if (result.success) {
+                state.products = result.data;
+                renderProducts();
+            }
+        }
+
+        async function searchProducts() {
+            const input = document.getElementById('searchInput');
+            state.searchTerm = input.value.trim();
+            const cat = state.selectedCategory;
+            let url = '/api/produits';
+            const params = new URLSearchParams();
+            if (state.searchTerm) params.append('q', state.searchTerm);
+            if (cat && cat !== 'all') params.append('categorie', cat);
+            if (params.toString()) url += '?' + params.toString();
+            
+            const result = await apiCall(url);
+            if (result.success) {
+                state.products = result.data;
+                renderProducts();
+            }
+        }
+
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            state.searchTerm = '';
+            state.selectedCategory = 'all';
+            document.querySelectorAll('.categories-filter button').forEach(b => b.classList.remove('active'));
+            document.querySelector('.categories-filter button[data-cat="all"]').classList.add('active');
+            loadProducts();
+        }
+
+        function filterByCategory(catId, btn) {
+            document.querySelectorAll('.categories-filter button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.selectedCategory = catId;
+            searchProducts();
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            if (!state.products || state.products.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-message">
+                        <div class="icon">🔍</div>
+                        <p>Aucun produit trouvé</p>
+                        <p style="font-size:12px;color:#bbb;">Essayez "BOI" ou "VIN"</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = state.products.map(p => `
+                <div class="product-card" onclick="addToCart(${p.id}, '${p.nom.replace(/'/g, "\\'")}', ${p.prix})">
+                    <div class="code">${p.code}</div>
+                    <div class="name">${p.nom}</div>
+                    <div class="price">${formatPrice(p.prix)}</div>
+                    ${p.cat_nom ? `<span class="category-tag" style="background:${p.cat_couleur || '#888'}">${p.cat_nom}</span>` : ''}
+                    <div class="stock">📦 ${p.stock || 0} ${p.unite || ''}</div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== CATÉGORIES ====================
+        async function loadCategories() {
+            const result = await apiCall('/api/categories');
+            if (result.success) {
+                state.categories = result.data;
+                renderCategories();
+            }
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categoriesFilter');
+            const allBtn = container.querySelector('button[data-cat="all"]');
+            container.innerHTML = '';
+            container.appendChild(allBtn);
+            
+            state.categories.forEach(c => {
+                const btn = document.createElement('button');
+                btn.dataset.cat = c.id;
+                btn.innerHTML = `<span class="color-dot" style="background:${c.couleur}"></span>${c.nom}`;
+                btn.onclick = () => filterByCategory(c.id, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        // ==================== PANIER ====================
+        async function addToCart(productId, name, price) {
+            // Vérifier si une commande est en cours
+            if (!state.currentFactureId) {
+                await newOrder();
+                if (!state.currentFactureId) {
+                    showError('Impossible de créer une commande');
+                    return;
+                }
+            }
+
+            // Vérifier si déjà dans le panier
+            const existing = state.cart.find(item => item.productId === productId);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                state.cart.push({ productId, name, price, quantity: 1 });
+            }
+
+            // Ajouter à la facture via API
+            const result = await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
+                method: 'POST',
+                body: JSON.stringify({ produit_id: productId, quantite: 1 })
+            });
+            
+            if (result.success) {
+                renderCart();
+                // Mettre à jour les totaux
+                if (result.totaux) {
+                    updateTotals(
+                        parseFloat(result.totaux.sous_total),
+                        parseFloat(result.totaux.taxes),
+                        parseFloat(result.totaux.total)
+                    );
+                }
+            } else {
+                showError('Erreur lors de l\'ajout du produit');
+                // Retirer du panier en cas d'erreur
+                const idx = state.cart.findIndex(i => i.productId === productId);
+                if (idx !== -1) state.cart.splice(idx, 1);
+            }
+        }
+
+        function updateQuantity(productId, delta) {
+            const item = state.cart.find(i => i.productId === productId);
+            if (!item) return;
+            
+            const newQty = item.quantity + delta;
+            if (newQty <= 0) {
+                state.cart = state.cart.filter(i => i.productId !== productId);
+            } else {
+                item.quantity = newQty;
+            }
+            
+            // Mettre à jour via API (ajouter ou supprimer)
+            if (newQty > 0) {
+                // Pour simplifier, on ajoute une unité ou on enlève
+                // Ici on utilise une approche simple : on ajoute/supprime une unité
+                const action = delta > 0 ? 'add' : 'remove';
+                const qty = Math.abs(delta);
+                // On pourrait implémenter une mise à jour plus précise
+                // Pour l'instant on recharge la facture
+                refreshCart();
+            } else {
+                // Si supprimé, on recharge
+                refreshCart();
+            }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            if (state.cart.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-message">
+                        <div class="icon">🛒</div>
+                        <p>Sélectionnez des produits</p>
+                    </div>
+                `;
+                document.getElementById('btnPay').disabled = true;
+                updateTotals(0, 0, 0);
+                return;
+            }
+
+            container.innerHTML = state.cart.map(item => `
+                <div class="cart-item">
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">${formatPrice(item.price)}</div>
+                    </div>
+                    <div class="item-qty">
+                        <button onclick="updateQuantity(${item.productId}, -1)">−</button>
+                        <span class="qty">${item.quantity}</span>
+                        <button onclick="updateQuantity(${item.productId}, 1)">+</button>
+                    </div>
+                    <div class="item-total">${formatPrice(item.price * item.quantity)}</div>
+                </div>
+            `).join('');
+
+            // Mettre à jour les totaux
+            const totals = calculateTotals();
+            updateTotals(totals.subtotal, totals.taxes, totals.total);
+            document.getElementById('btnPay').disabled = state.cart.length === 0;
+        }
+
+        function calculateTotals() {
+            const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const taxes = subtotal * 0.18;
+            const total = subtotal + taxes;
+            return { subtotal, taxes, total };
+        }
+
+        function updateTotals(subtotal, taxes, total) {
+            document.getElementById('subtotal').textContent = formatPrice(subtotal);
+            document.getElementById('taxes').textContent = formatPrice(taxes);
+            document.getElementById('total').textContent = formatPrice(total);
+        }
+
+        function formatPrice(price) {
+            return Number(price).toLocaleString('fr-FR') + ' FCFA';
+        }
+
+        async function refreshCart() {
+            if (!state.currentFactureId) return;
+            const result = await apiCall(`/api/factures/${state.currentFactureId}`);
+            if (result.success) {
+                const data = result.data;
+                // Mettre à jour le panier
+                state.cart = (data.lignes || []).map(l => ({
+                    productId: l.produit_id,
+                    name: l.produit_nom,
+                    price: parseFloat(l.prix_unitaire),
+                    quantity: l.quantite
+                }));
+                renderCart();
+                if (data.sous_total) {
+                    updateTotals(
+                        parseFloat(data.sous_total),
+                        parseFloat(data.taxes),
+                        parseFloat(data.total)
+                    );
+                }
+            }
+        }
+
+        // ==================== FACTURES ====================
+        async function newOrder() {
+            try {
+                const result = await apiCall('/api/factures', {
+                    method: 'POST',
+                    body: JSON.stringify({ table_id: state.currentTable, utilisateur_id: 1 })
+                });
+                
+                if (result.success) {
+                    state.currentFactureId = result.data.id;
+                    state.cart = [];
+                    renderCart();
+                    document.getElementById('tableInfo').textContent = `Table #${state.currentTable}`;
+                    document.getElementById('orderCount').textContent = `#${result.data.numero}`;
+                    document.getElementById('btnPay').disabled = true;
+                    updateTotals(0, 0, 0);
+                    return true;
+                } else {
+                    showError('Erreur lors de la création de la commande');
+                    return false;
+                }
+            } catch (error) {
+                showError('Erreur: ' + error.message);
+                return false;
+            }
+        }
+
+        async function payOrder() {
+            if (!state.currentFactureId || state.cart.length === 0) {
+                showError('Panier vide');
+                return;
+            }
+            
+            if (!confirm('Confirmer le paiement de ' + document.getElementById('total').textContent + ' ?')) return;
+            
+            const result = await apiCall(`/api/factures/${state.currentFactureId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ 
+                    statut: 'payée', 
+                    mode_paiement: 'espèces' 
+                })
+            });
+            
+            if (result.success) {
+                alert('✅ Paiement effectué avec succès !');
+                // Créer une nouvelle commande
+                await newOrder();
+            } else {
+                showError('Erreur lors du paiement');
+            }
+        }
+
+        // ==================== HORLOGE ====================
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('fr-FR');
+        }
+    </script>
+</body>
+</html>
