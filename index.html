@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RestauManager - POS</title>
+    <title>RestauManager POS - Omega Consulting</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -13,10 +13,62 @@
             touch-action: manipulation;
             user-select: none;
         }
+        
+        /* === BANNIÈRE OMEGA CONSULTING === */
+        .brand-banner {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #e94560;
+        }
+        .brand-banner .brand-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-banner .brand-logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .brand-banner .brand-slogan {
+            font-size: 12px;
+            opacity: 0.8;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        .brand-banner .brand-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 13px;
+        }
+        .brand-banner .brand-right .version {
+            background: rgba(233, 69, 96, 0.3);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            border: 1px solid rgba(233, 69, 96, 0.5);
+        }
+        .brand-banner .brand-right .phone {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #ff6b6b;
+        }
+        
+        /* === HEADER === */
         .header {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             color: white;
-            padding: 12px 16px;
+            padding: 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -35,7 +87,7 @@
         }
         .main-container {
             display: flex;
-            height: calc(100vh - 60px);
+            height: calc(100vh - 110px);
             gap: 0;
         }
         .products-panel {
@@ -156,13 +208,13 @@
         }
         .product-card .stock { font-size: 10px; color: #888; margin-top: 4px; }
         .cart-panel {
-            width: 380px;
-            min-width: 320px;
+            width: 420px;
+            min-width: 360px;
             background: white;
             display: flex;
             flex-direction: column;
             border-left: 1px solid #e0e0e0;
-            max-height: calc(100vh - 60px);
+            max-height: calc(100vh - 110px);
         }
         .cart-header {
             padding: 12px 16px;
@@ -208,12 +260,12 @@
             flex-shrink: 0;
         }
         .cart-item .item-qty button {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             border: 2px solid #4a90d9;
             background: white;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #4a90d9;
             cursor: pointer;
@@ -238,49 +290,80 @@
         .cart-item .item-total { 
             font-weight: 700; 
             color: #e94560; 
-            min-width: 80px; 
+            min-width: 90px; 
             text-align: right;
             font-size: 15px;
             flex-shrink: 0;
         }
+        
+        /* === TOTAUX AGRANDIS === */
         .cart-footer {
-            padding: 12px 16px;
-            border-top: 2px solid #e0e0e0;
+            padding: 16px 20px;
+            border-top: 3px solid #e0e0e0;
             background: #f8f9fa;
             flex-shrink: 0;
         }
         .cart-footer .total-line {
             display: flex;
             justify-content: space-between;
-            padding: 4px 0;
-            font-size: 14px;
+            padding: 6px 0;
+            font-size: 16px;
+        }
+        .cart-footer .total-line .label { 
+            color: #555;
+            font-weight: 500;
+        }
+        .cart-footer .total-line .value { 
+            font-weight: 600;
+            font-size: 17px;
+        }
+        .cart-footer .total-line.sous-total .value {
+            color: #4a90d9;
+        }
+        .cart-footer .total-line.tva .value {
+            color: #f39c12;
         }
         .cart-footer .total-line.grand-total {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1a1a2e;
-            border-top: 2px solid #e0e0e0;
-            padding-top: 8px;
-            margin-top: 4px;
+            font-size: 26px;
+            font-weight: 800;
+            padding: 10px 0 8px 0;
+            border-top: 3px solid #1a1a2e;
+            margin-top: 6px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            margin: 6px -20px -16px -20px;
+            padding: 14px 20px;
+            border-radius: 0 0 12px 12px;
+            color: white;
         }
-        .cart-footer .total-line .label { color: #666; }
-        .cart-footer .total-line .value { font-weight: 600; }
+        .cart-footer .total-line.grand-total .label {
+            color: rgba(255,255,255,0.7);
+            font-weight: 600;
+        }
+        .cart-footer .total-line.grand-total .value {
+            color: #2ecc71;
+            font-size: 28px;
+            font-weight: 800;
+            text-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
+        }
+        
         .cart-footer .btn-pay {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: linear-gradient(135deg, #27ae60, #2ecc71);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 8px;
+            margin-top: 12px;
             touch-action: manipulation;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
+            letter-spacing: 1px;
         }
         .cart-footer .btn-pay:active { transform: scale(0.98); }
         .cart-footer .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; }
+        
         .empty-message {
             text-align: center;
             padding: 40px 20px;
@@ -289,7 +372,7 @@
         .empty-message .icon { font-size: 48px; margin-bottom: 12px; }
         .loading { text-align: center; padding: 20px; color: #666; }
         
-        /* Notification toast */
+        /* Toast notification */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -297,13 +380,15 @@
             transform: translateX(-50%);
             background: #333;
             color: white;
-            padding: 12px 24px;
+            padding: 14px 28px;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 15px;
             z-index: 999;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            max-width: 90%;
         }
         .toast.show {
             opacity: 1;
@@ -326,10 +411,42 @@
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
             .search-bar input { font-size: 14px; padding: 10px 14px; }
+            .brand-banner {
+                flex-direction: column;
+                text-align: center;
+                gap: 4px;
+                padding: 6px 12px;
+            }
+            .brand-banner .brand-left {
+                flex-direction: column;
+                gap: 2px;
+            }
+            .cart-panel {
+                max-height: 60vh;
+            }
+            .cart-footer .total-line.grand-total {
+                font-size: 20px;
+            }
+            .cart-footer .total-line.grand-total .value {
+                font-size: 22px;
+            }
         }
     </style>
 </head>
 <body>
+
+    <!-- === BANNIÈRE OMEGA CONSULTING === -->
+    <div class="brand-banner">
+        <div class="brand-left">
+            <span class="brand-logo">Ω OMEGA CONSULTING</span>
+            <span class="brand-slogan">| INFORMATIQUE - GESTION - FORMATION</span>
+        </div>
+        <div class="brand-right">
+            <span class="version">v3.0 POS</span>
+            <span class="phone">📞 +221 77 123 45 67</span>
+            <span>🏢 Dakar, Sénégal</span>
+        </div>
+    </div>
 
     <div class="header">
         <h1>🍽️ RestauManager POS</h1>
@@ -373,16 +490,16 @@
             </div>
 
             <div class="cart-footer">
-                <div class="total-line">
-                    <span class="label">Sous-total</span>
+                <div class="total-line sous-total">
+                    <span class="label">📊 Sous-total</span>
                     <span class="value" id="subtotal">0 FCFA</span>
                 </div>
-                <div class="total-line">
-                    <span class="label">TVA (18%)</span>
+                <div class="total-line tva">
+                    <span class="label">📈 TVA (18%)</span>
                     <span class="value" id="taxes">0 FCFA</span>
                 </div>
                 <div class="total-line grand-total">
-                    <span class="label">TOTAL</span>
+                    <span class="label">💰 TOTAL</span>
                     <span class="value" id="total">0 FCFA</span>
                 </div>
                 <button class="btn-pay" id="btnPay" disabled onclick="payOrder()">💳 Payer</button>
@@ -545,7 +662,6 @@
                 }
             }
 
-            // Ajouter au panier local
             const existing = state.cart.find(item => item.productId === productId);
             if (existing) {
                 existing.quantity += 1;
@@ -553,7 +669,6 @@
                 state.cart.push({ productId, name, price, quantity: 1 });
             }
 
-            // Envoyer à l'API
             const result = await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
                 method: 'POST',
                 body: JSON.stringify({ produit_id: productId, quantite: 1 })
@@ -570,7 +685,6 @@
                 }
                 showToast(`${name} ajouté !`, 'success');
             } else {
-                // Annuler l'ajout local
                 const idx = state.cart.findIndex(i => i.productId === productId);
                 if (idx !== -1) state.cart.splice(idx, 1);
                 renderCart();
@@ -580,20 +694,15 @@
 
         async function updateQuantity(productId, delta) {
             const item = state.cart.find(i => i.productId === productId);
-            if (!item) {
-                console.error('Produit non trouvé dans le panier:', productId);
-                return;
-            }
+            if (!item) return;
             
             const newQty = item.quantity + delta;
             
             if (newQty <= 0) {
-                // Supprimer l'article
                 state.cart = state.cart.filter(i => i.productId !== productId);
                 await updateFactureItem(productId, 0);
                 showToast(`${item.name} retiré`, 'info');
             } else {
-                // Mettre à jour la quantité
                 item.quantity = newQty;
                 await updateFactureItem(productId, newQty);
             }
@@ -605,7 +714,6 @@
         async function updateFactureItem(productId, quantity) {
             if (!state.currentFactureId) return;
             
-            // Récupérer la facture pour connaître les lignes
             const result = await apiCall(`/api/factures/${state.currentFactureId}`);
             if (result.success) {
                 const lignes = result.data.lignes || [];
@@ -613,13 +721,10 @@
                 
                 if (ligne) {
                     if (quantity <= 0) {
-                        // Supprimer la ligne
                         await apiCall(`/api/factures/${state.currentFactureId}/lignes/${ligne.id}`, {
                             method: 'DELETE'
                         });
                     } else {
-                        // Mettre à jour la quantité (approche: supprimer et recréer)
-                        // Pour simplifier, on ajoute une ligne avec la différence
                         const diff = quantity - ligne.quantite;
                         if (diff !== 0) {
                             if (diff > 0) {
@@ -628,7 +733,6 @@
                                     body: JSON.stringify({ produit_id: productId, quantite: diff })
                                 });
                             } else {
-                                // Pour réduire, on supprime et recrée
                                 await apiCall(`/api/factures/${state.currentFactureId}/lignes/${ligne.id}`, {
                                     method: 'DELETE'
                                 });
@@ -642,7 +746,6 @@
                         }
                     }
                 } else if (quantity > 0) {
-                    // Ajouter la ligne
                     await apiCall(`/api/factures/${state.currentFactureId}/lignes`, {
                         method: 'POST',
                         body: JSON.stringify({ produit_id: productId, quantite: quantity })
@@ -689,9 +792,9 @@
                         <div class="item-price">${formatPrice(item.price)}</div>
                     </div>
                     <div class="item-qty">
-                        <button onclick="updateQuantity(${item.productId}, -1)" data-action="decrease">−</button>
+                        <button onclick="updateQuantity(${item.productId}, -1)">−</button>
                         <span class="qty" id="qty-${item.productId}">${item.quantity}</span>
-                        <button onclick="updateQuantity(${item.productId}, 1)" data-action="increase">+</button>
+                        <button onclick="updateQuantity(${item.productId}, 1)">+</button>
                     </div>
                     <div class="item-total">${formatPrice(item.price * item.quantity)}</div>
                 </div>
