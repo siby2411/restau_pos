@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RestauManager POS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .login-container .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-container .logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .login-container .logo p {
+            color: #888;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .login-container .form-group {
+            margin-bottom: 16px;
+        }
+        .login-container label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .login-container input:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+        .login-container .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .login-container .btn:hover {
+            transform: scale(1.02);
+        }
+        .login-container .btn:active {
+            transform: scale(0.98);
+        }
+        .login-container .error {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 8px;
+            text-align: center;
+            display: none;
+        }
+        .login-container .info {
+            color: #666;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 16px;
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+        }
+        .login-container .info strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>Ω RestauManager</h1>
+            <p>Point de vente - Caissiers</p>
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="ex: caissier1@restaurant.com" required>
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" id="password" placeholder="123" required>
+            </div>
+            <div class="error" id="errorMsg">Identifiants incorrects</div>
+            <button type="submit" class="btn">🔐 Se connecter</button>
+        </form>
+        <div class="info">
+            <strong>Caissiers disponibles :</strong><br>
+            caissier1@restaurant.com / 123<br>
+            caissier2@restaurant.com / 123<br>
+            caissier3@restaurant.com / 123<br>
+            caissier4@restaurant.com / 123
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            
+            errorMsg.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Stocker les infos du caissier
+                    localStorage.setItem('caissier', JSON.stringify(data.data));
+                    window.location.href = '/';
+                } else {
+                    errorMsg.textContent = data.error || 'Identifiants incorrects';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                errorMsg.textContent = 'Erreur de connexion au serveur';
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
