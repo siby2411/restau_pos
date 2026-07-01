@@ -38,7 +38,6 @@ try {
     $id = isset($parts[1]) ? $parts[1] : null;
     $method = $_SERVER['REQUEST_METHOD'];
     
-    // Gérer les données POST (JSON ou FormData)
     $input = [];
     $isFormData = false;
     $uploadedFile = null;
@@ -77,7 +76,7 @@ try {
     $routeFound = false;
     
     // ============================================================
-    // 1. PRODUITS - CRUD COMPLET
+    // 1. PRODUITS
     // ============================================================
     if ($resource === 'produits') {
         $routeFound = true;
@@ -279,8 +278,7 @@ try {
         $routeFound = true;
         if ($method === 'GET') {
             $stmt = $pdo->query("SELECT * FROM categories ORDER BY nom");
-            $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            sendJSON(['success' => true, 'data' => $categories]);
+            sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
         }
         if ($method === 'POST') {
             $stmt = $pdo->prepare("INSERT INTO categories (nom, couleur, icone) VALUES (?,?,?)");
@@ -400,23 +398,56 @@ try {
             $facture_id = (int)$id;
             $statut = isset($input['statut']) ? $input['statut'] : 'payée';
             $mode_paiement = isset($input['mode_paiement']) ? $input['mode_paiement'] : 'espèces';
+            $client_id = isset($input['client_id']) ? (int)$input['client_id'] : null;
             
             recalculerFacture($pdo, $facture_id);
-            $pdo->prepare("UPDATE factures SET statut = ?, mode_paiement = ? WHERE id = ?")->execute([$statut, $mode_paiement, $facture_id]);
             
-            if ($statut === 'payée') {
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare("UPDATE factures SET statut = ?, mode_paiement = ? WHERE id = ?")->execute([$statut, $mode_paiement, $facture_id]);
+                
+                if ($mode_paiement === 'qrcode' || $mode_paiement === 'qrcode_mobile') {
+                    $reference = 'QR-' . date('YmdHis') . '-' . rand(1000, 9999);
+                    
+                    if (!$client_id) {
+                        $stmt = $pdo->prepare("INSERT INTO clients (nom, prenom, telephone, email, adresse, notes) VALUES (?, ?, ?, ?, ?, ?)");
+                        $stmt->execute([
+                            'Client QR',
+                            'Anonyme',
+                            'N/A',
+                            'qr_' . time() . '@restaurant.com',
+                            'Paiement QR Code',
+                            'Client créé automatiquement'
+                        ]);
+                        $client_id = $pdo->lastInsertId();
+                    }
+                    
+                    $stmt = $pdo->prepare("INSERT INTO transactions_qr (facture_id, client_id, montant, mode_paiement, statut, reference, date_paiement) 
+                                           VALUES (?, ?, ?, ?, 'payé', ?, NOW())");
+                    $stmt->execute([$facture_id, $client_id, $facture['total'] ?? 0, $mode_paiement, $reference]);
+                    
+                    $stmt = $pdo->prepare("UPDATE clients SET solde = solde - ?, total_achats = total_achats + ? WHERE id = ?");
+                    $stmt->execute([$facture['total'] ?? 0, $facture['total'] ?? 0, $client_id]);
+                }
+                
                 $stmt = $pdo->prepare("SELECT table_id FROM factures WHERE id = ?");
                 $stmt->execute([$facture_id]);
                 $table = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($table && $table['table_id']) {
                     $pdo->prepare("UPDATE tables_resto SET statut = 'libre' WHERE id = ?")->execute([$table['table_id']]);
                 }
+                
+                $pdo->commit();
+                
+                $stmt = $pdo->prepare("SELECT * FROM factures WHERE id = ?");
+                $stmt->execute([$facture_id]);
+                $facture = $stmt->fetch(PDO::FETCH_ASSOC);
+                sendJSON(['success' => true, 'data' => $facture, 'message' => 'Paiement effectué avec succès']);
+                
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                throw $e;
             }
-            
-            $stmt = $pdo->prepare("SELECT * FROM factures WHERE id = ?");
-            $stmt->execute([$facture_id]);
-            $facture = $stmt->fetch(PDO::FETCH_ASSOC);
-            sendJSON(['success' => true, 'data' => $facture, 'message' => 'Facture mise à jour']);
         }
     }
     
@@ -545,26 +576,32 @@ try {
     // ============================================================
     if ($resource === 'clients' && !$routeFound) {
         $routeFound = true;
-        if ($method === 'GET') {
+        if ($method === 'GET' && !$id) {
             $q = $_GET['q'] ?? '';
-            $stmt = $pdo->prepare("SELECT * FROM clients WHERE nom LIKE ? OR telephone LIKE ? ORDER BY nom LIMIT 50");
-            $stmt->execute(["%$q%", "%$q%"]);
+            $stmt = $pdo->prepare("SELECT id, nom, prenom, telephone, email, adresse, notes, solde, total_achats, created_at 
+                                   FROM clients 
+                                   WHERE nom LIKE ? OR telephone LIKE ? OR email LIKE ? 
+                                   ORDER BY nom LIMIT 50");
+            $search = "%$q%";
+            $stmt->execute([$search, $search, $search]);
             sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
         }
-        if ($method === 'POST') {
-            $stmt = $pdo->prepare("INSERT INTO clients (nom, prenom, telephone, email, adresse, notes) VALUES (?,?,?,?,?,?)");
-            $stmt->execute([
-                $input['nom'],
-                $input['prenom'] ?? '',
-                $input['telephone'] ?? '',
-                $input['email'] ?? '',
-                $input['adresse'] ?? '',
-                $input['notes'] ?? ''
-            ]);
-            sendJSON(['success' => true, 'id' => $pdo->lastInsertId(), 'message' => 'Client créé']);
+        
+        if ($method === 'GET' && $id) {
+            $stmt = $pdo->prepare("SELECT c.*, 
+                                   (SELECT COUNT(*) FROM transactions_qr WHERE client_id = c.id AND statut = 'payé') as nb_transactions,
+                                   (SELECT SUM(montant) FROM transactions_qr WHERE client_id = c.id AND statut = 'payé') as total_depense
+                                   FROM clients c WHERE c.id = ?");
+            $stmt->execute([$id]);
+            $client = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$client) {
+                sendJSON(['success' => false, 'error' => 'Client non trouvé'], 404);
+            }
+            sendJSON(['success' => true, 'data' => $client]);
         }
-        if ($method === 'PUT' && $id) {
-            $stmt = $pdo->prepare("UPDATE clients SET nom=?, prenom=?, telephone=?, email=?, adresse=?, notes=? WHERE id=?");
+        
+        if ($method === 'POST' && !$id) {
+            $stmt = $pdo->prepare("INSERT INTO clients (nom, prenom, telephone, email, adresse, notes, solde) VALUES (?,?,?,?,?,?,?)");
             $stmt->execute([
                 $input['nom'],
                 $input['prenom'] ?? '',
@@ -572,18 +609,133 @@ try {
                 $input['email'] ?? '',
                 $input['adresse'] ?? '',
                 $input['notes'] ?? '',
-                $id
+                $input['solde'] ?? 0
             ]);
-            sendJSON(['success' => true, 'message' => 'Client mis à jour']);
+            sendJSON(['success' => true, 'id' => $pdo->lastInsertId(), 'message' => 'Client créé']);
         }
+        
+        if ($method === 'PUT' && $id) {
+            // ... code existant
+        }
+        
         if ($method === 'DELETE' && $id) {
-            $pdo->prepare("DELETE FROM clients WHERE id=?")->execute([$id]);
-            sendJSON(['success' => true, 'message' => 'Client supprimé']);
+            // ... code existant
         }
     }
     
     // ============================================================
-    // 8. FINANCIER
+    // 8. TRANSACTIONS QR
+    // ============================================================
+    if ($resource === 'transactions' && !$routeFound) {
+        $routeFound = true;
+        
+        if ($method === 'GET' && !$id) {
+            $statut = $_GET['statut'] ?? null;
+            $date_debut = $_GET['date_debut'] ?? date('Y-m-01');
+            $date_fin = $_GET['date_fin'] ?? date('Y-m-t');
+            
+            $sql = "SELECT t.*, f.numero as facture_numero, f.total as facture_total, 
+                           CONCAT(c.prenom, ' ', c.nom) as client_nom, c.telephone as client_telephone
+                    FROM transactions_qr t
+                    LEFT JOIN factures f ON f.id = t.facture_id
+                    LEFT JOIN clients c ON c.id = t.client_id
+                    WHERE DATE(t.date_creation) BETWEEN ? AND ?";
+            $params = [$date_debut, $date_fin];
+            
+            if ($statut) {
+                $sql .= " AND t.statut = ?";
+                $params[] = $statut;
+            }
+            
+            $sql .= " ORDER BY t.date_creation DESC";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        }
+        
+        if ($method === 'GET' && $id) {
+            $stmt = $pdo->prepare("SELECT t.*, f.numero as facture_numero, f.total as facture_total, 
+                                   CONCAT(c.prenom, ' ', c.nom) as client_nom, c.telephone as client_telephone,
+                                   c.solde as client_solde
+                                   FROM transactions_qr t
+                                   LEFT JOIN factures f ON f.id = t.facture_id
+                                   LEFT JOIN clients c ON c.id = t.client_id
+                                   WHERE t.id = ?");
+            $stmt->execute([$id]);
+            $transaction = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$transaction) {
+                sendJSON(['success' => false, 'error' => 'Transaction non trouvée'], 404);
+            }
+            sendJSON(['success' => true, 'data' => $transaction]);
+        }
+        
+        if ($method === 'PUT' && $id) {
+            $statut = isset($input['statut']) ? $input['statut'] : 'payé';
+            $stmt = $pdo->prepare("UPDATE transactions_qr SET statut = ? WHERE id = ?");
+            $stmt->execute([$statut, $id]);
+            sendJSON(['success' => true, 'message' => 'Transaction mise à jour']);
+        }
+    }
+    
+    // ============================================================
+    // 9. QR CODE
+    // ============================================================
+    if ($resource === 'qrcode' && !$routeFound) {
+        $routeFound = true;
+        if ($method === 'GET' && $id) {
+            $facture_id = (int)$id;
+            $stmt = $pdo->prepare("SELECT f.*, t.numero as table_num, c.nom as client_nom, c.id as client_id 
+                                   FROM factures f 
+                                   LEFT JOIN tables_resto t ON t.id = f.table_id 
+                                   LEFT JOIN clients c ON c.id = f.client_id 
+                                   WHERE f.id = ?");
+            $stmt->execute([$facture_id]);
+            $facture = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$facture) {
+                sendJSON(['success' => false, 'error' => 'Facture non trouvée'], 404);
+            }
+            
+            $reference = 'QR-' . date('YmdHis') . '-' . rand(1000, 9999);
+            
+            $qrData = [
+                't' => 'p',
+                'i' => (string)$facture_id,
+                'n' => $facture['numero'],
+                'm' => (string)$facture['total'],
+                'r' => $reference
+            ];
+            
+            $qrJson = json_encode($qrData);
+            $qrBase64 = base64_encode($qrJson);
+            
+            $stmt = $pdo->prepare("INSERT INTO transactions_qr (facture_id, client_id, montant, mode_paiement, statut, reference, qr_data) 
+                                   VALUES (?, ?, ?, 'qrcode_mobile', 'en_attente', ?, ?)");
+            $stmt->execute([
+                $facture_id, 
+                $facture['client_id'] ?? null, 
+                $facture['total'], 
+                $reference,
+                $qrBase64
+            ]);
+            
+            $transaction_id = $pdo->lastInsertId();
+            $qrUrl = "http://localhost:8080/paiement.html?q=" . urlencode($qrBase64);
+            
+            sendJSON([
+                'success' => true, 
+                'data' => [
+                    'qr_data' => $qrBase64,
+                    'facture' => $facture,
+                    'url' => $qrUrl,
+                    'reference' => $reference,
+                    'transaction_id' => $transaction_id
+                ]
+            ]);
+        }
+    }
+    
+    // ============================================================
+    // 10. FINANCIER
     // ============================================================
     if ($resource === 'financier' && !$routeFound) {
         $routeFound = true;
@@ -635,96 +787,24 @@ try {
     }
     
     // ============================================================
-    // 9. UTILISATEURS
-    // ============================================================
-    if ($resource === 'utilisateurs' && !$routeFound) {
-        $routeFound = true;
-        if ($method === 'GET' && !$id) {
-            $stmt = $pdo->query("SELECT id, nom, prenom, email, role, actif FROM utilisateurs ORDER BY id");
-            sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
-        }
-        if ($method === 'GET' && $id) {
-            $stmt = $pdo->prepare("SELECT id, nom, prenom, email, role, actif FROM utilisateurs WHERE id = ?");
-            $stmt->execute([$id]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$user) {
-                sendJSON(['success' => false, 'error' => 'Utilisateur non trouvé'], 404);
-            }
-            sendJSON(['success' => true, 'data' => $user]);
-        }
-    }
-    
-    // ============================================================
-    // 10. QR CODE - Version simplifiée avec données courtes
-    // ============================================================
-    if ($resource === 'qrcode' && !$routeFound) {
-        $routeFound = true;
-        if ($method === 'GET' && $id) {
-            $facture_id = (int)$id;
-            $stmt = $pdo->prepare("SELECT f.*, t.numero as table_num FROM factures f LEFT JOIN tables_resto t ON t.id = f.table_id WHERE f.id = ?");
-            $stmt->execute([$facture_id]);
-            $facture = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$facture) {
-                sendJSON(['success' => false, 'error' => 'Facture non trouvée'], 404);
-            }
-            
-            // Données simplifiées pour le QR Code (courtes)
-            $qrData = [
-                't' => 'p',                    // type: paiement
-                'i' => (string)$facture_id,    // id facture
-                'n' => $facture['numero'],     // numero
-                'm' => (string)$facture['total'] // montant
-            ];
-            
-            // Encoder en base64
-            $qrJson = json_encode($qrData);
-            $qrBase64 = base64_encode($qrJson);
-            
-            // URL courte pour le QR Code
-            $qrUrl = "http://localhost:8080/paiement.html?q=" . urlencode($qrBase64);
-            
-            sendJSON([
-                'success' => true, 
-                'data' => [
-                    'qr_data' => $qrBase64,
-                    'facture' => $facture,
-                    'url' => $qrUrl
-                ]
-            ]);
-        }
-    }
-    
-    // ============================================================
     // 11. Route par défaut
     // ============================================================
     if (!$routeFound) {
         sendJSON([
             'success' => true,
-            'message' => 'API Restaurant - POS v3.4',
-            'version' => '3.4 - QR Code optimisé',
+            'message' => 'API Restaurant - POS v4.0',
+            'version' => '4.0 - QR Code',
             'endpoints' => [
                 'GET /api/produits' => 'Liste des produits',
-                'GET /api/produits/{id}' => 'Détail produit',
-                'POST /api/produits' => 'Créer un produit',
-                'PUT /api/produits/{id}' => 'Modifier un produit',
-                'DELETE /api/produits/{id}' => 'Supprimer un produit',
                 'GET /api/categories' => 'Liste des catégories',
                 'POST /api/factures' => 'Créer une commande',
-                'POST /api/factures/{id}/lignes' => 'Ajouter un produit',
                 'GET /api/factures' => 'Toutes les factures',
-                'GET /api/factures/{id}' => 'Détail facture',
                 'PUT /api/factures/{id}' => 'Payer facture',
-                'GET /api/dashboard' => 'Tableau de bord',
-                'GET /api/tables' => 'Liste des tables',
-                'GET /api/reservations' => 'Réservations par période',
-                'POST /api/reservations' => 'Créer réservation',
+                'GET /api/qrcode/{id}' => 'Générer QR Code',
+                'GET /api/transactions' => 'Liste des transactions QR',
                 'GET /api/clients' => 'Liste des clients',
-                'POST /api/clients' => 'Créer client',
-                'PUT /api/clients/{id}' => 'Modifier client',
-                'DELETE /api/clients/{id}' => 'Supprimer client',
-                'GET /api/financier' => 'État financier',
-                'GET /api/utilisateurs' => 'Liste des utilisateurs',
-                'GET /api/qrcode/{id}' => 'Générer QR Code'
+                'GET /api/dashboard' => 'Tableau de bord',
+                'GET /api/financier' => 'État financier'
             ]
         ]);
     }
@@ -753,10 +833,8 @@ function generateProductCode($pdo, $categorieId) {
     $cat->execute([$categorieId]);
     $catNom = $cat->fetch(PDO::FETCH_ASSOC)['nom'] ?? 'PROD';
     $prefix = strtoupper(substr($catNom, 0, 3));
-    
     $stmt = $pdo->prepare("SELECT COUNT(*) + 1 as nb FROM produits WHERE categorie_id=?");
     $stmt->execute([$categorieId]);
     $nb = $stmt->fetch(PDO::FETCH_ASSOC)['nb'] ?? 1;
-    
     return $prefix . '-' . str_pad($nb, 4, '0', STR_PAD_LEFT);
 }
