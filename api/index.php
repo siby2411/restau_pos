@@ -77,7 +77,26 @@ try {
     $routeFound = false;
     
     // ============================================================
-    // 1. PRODUITS - CRUD COMPLET
+    // LOGIN
+    // ============================================================
+    if ($resource === 'login' && !$routeFound) {
+        $routeFound = true;
+        if ($method === 'POST') {
+            $email = $input['email'] ?? '';
+            $password = $input['password'] ?? '';
+            $stmt = $pdo->prepare("SELECT id, nom, prenom, email, 'caissier' as role, actif FROM caissiers WHERE email = ? AND password = MD5(?) AND actif = 1");
+            $stmt->execute([$email, $password]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($user) {
+                sendJSON(['success' => true, 'data' => $user, 'message' => 'Authentification réussie']);
+            } else {
+                sendJSON(['success' => false, 'error' => 'Email ou mot de passe incorrect'], 401);
+            }
+        }
+    }
+    
+    // ============================================================
+    // 1. PRODUITS
     // ============================================================
     if ($resource === 'produits') {
         $routeFound = true;
@@ -165,48 +184,49 @@ try {
                 sendJSON(['success' => false, 'error' => 'Produit non trouvé'], 404);
             }
             
-            // Construire la requête UPDATE dynamiquement
             $updateFields = [];
             $params = [];
+            $hasData = false;
             
-            // Ne mettre à jour que les champs fournis
             if (isset($input['nom']) && $input['nom'] !== '') {
                 $updateFields[] = "nom = ?";
                 $params[] = $input['nom'];
+                $hasData = true;
             }
             if (isset($input['description'])) {
                 $updateFields[] = "description = ?";
                 $params[] = $input['description'];
+                $hasData = true;
             }
             if (isset($input['prix']) && $input['prix'] !== '') {
                 $updateFields[] = "prix = ?";
                 $params[] = $input['prix'];
+                $hasData = true;
             }
             if (isset($input['prix_achat']) && $input['prix_achat'] !== '') {
                 $updateFields[] = "prix_achat = ?";
                 $params[] = $input['prix_achat'];
+                $hasData = true;
             }
             if (isset($input['categorie_id']) && $input['categorie_id'] !== '') {
                 $updateFields[] = "categorie_id = ?";
                 $params[] = $input['categorie_id'];
+                $hasData = true;
             }
             if (isset($input['stock']) && $input['stock'] !== '') {
                 $updateFields[] = "stock = ?";
                 $params[] = $input['stock'];
+                $hasData = true;
             }
             if (isset($input['unite']) && $input['unite'] !== '') {
                 $updateFields[] = "unite = ?";
                 $params[] = $input['unite'];
+                $hasData = true;
             }
-            if (isset($input['disponible'])) {
-                $updateFields[] = "disponible = ?";
-                $params[] = $input['disponible'];
-            }
-            
-            // Gérer l'image
-            if (isset($input['image_url']) && $input['image_url'] !== $existing['image_url']) {
+            if (isset($input['image_url']) && $input['image_url'] !== '') {
                 $updateFields[] = "image_url = ?";
                 $params[] = $input['image_url'];
+                $hasData = true;
                 if ($existing['image_url']) {
                     $oldImagePath = __DIR__ . '/..' . $existing['image_url'];
                     if (file_exists($oldImagePath)) {
@@ -215,9 +235,9 @@ try {
                 }
             }
             
-            // Vérifier qu'au moins un champ est modifié
-            if (empty($updateFields)) {
-                sendJSON(['success' => false, 'error' => 'Aucune modification à effectuer'], 400);
+            if (!$hasData) {
+                sendJSON(['success' => false, 'error' => 'Aucune donnée à mettre à jour'], 400);
+                return;
             }
             
             $params[] = $id;
@@ -230,7 +250,9 @@ try {
                                     LEFT JOIN categories c ON c.id = p.categorie_id 
                                     WHERE p.id = ?");
             $stmt2->execute([$id]);
-            sendJSON(['success' => true, 'data' => $stmt2->fetch(), 'message' => 'Produit mis à jour avec succès']);
+            $updated = $stmt2->fetch(PDO::FETCH_ASSOC);
+            
+            sendJSON(['success' => true, 'data' => $updated, 'message' => 'Produit mis à jour avec succès']);
         }
         
         if ($method === 'DELETE' && $id) {
@@ -269,29 +291,18 @@ try {
             $stmt = $pdo->query("SELECT * FROM categories ORDER BY nom");
             sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
         }
-        if ($method === 'POST') {
-            $stmt = $pdo->prepare("INSERT INTO categories (nom, couleur, icone) VALUES (?,?,?)");
-            $stmt->execute([$input['nom'], $input['couleur'] ?? '#6366f1', $input['icone'] ?? 'tag']);
-            sendJSON(['success' => true, 'message' => 'Catégorie créée', 'id' => $pdo->lastInsertId()]);
-        }
     }
     
     // ============================================================
-    // 3. FACTURES - CORRIGÉ
+    // 3. FACTURES
     // ============================================================
     if ($resource === 'factures' && !$routeFound) {
         $routeFound = true;
         
-        // GET /factures - Liste avec totaux corrects
         if ($method === 'GET' && !$id) {
-            $stmt = $pdo->query("SELECT f.*, t.numero as table_num, 
-                                (SELECT COUNT(*) FROM lignes_facture WHERE facture_id = f.id) as nb_lignes 
-                                FROM factures f 
-                                LEFT JOIN tables_resto t ON t.id = f.table_id 
-                                ORDER BY f.created_at DESC LIMIT 50");
+            $stmt = $pdo->query("SELECT f.*, t.numero as table_num FROM factures f LEFT JOIN tables_resto t ON t.id = f.table_id ORDER BY f.created_at DESC LIMIT 50");
             $factures = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Recalculer les totaux pour chaque facture
             foreach ($factures as &$facture) {
                 $idFacture = $facture['id'];
                 $stmtTot = $pdo->prepare("SELECT COALESCE(SUM(quantite * prix_unitaire), 0) as total FROM lignes_facture WHERE facture_id = ?");
@@ -299,22 +310,16 @@ try {
                 $totalLignes = $stmtTot->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
                 $taxes = $totalLignes * 0.18;
                 $totalTTC = $totalLignes + $taxes;
-                
-                // Mettre à jour la facture avec les bons totaux
                 $pdo->prepare("UPDATE factures SET sous_total = ?, taxes = ?, total = ? WHERE id = ?")->execute([$totalLignes, $taxes, $totalTTC, $idFacture]);
                 $facture['sous_total'] = number_format($totalLignes, 2, '.', '');
                 $facture['taxes'] = number_format($taxes, 2, '.', '');
                 $facture['total'] = number_format($totalTTC, 2, '.', '');
             }
-            
             sendJSON(['success' => true, 'data' => $factures]);
         }
         
-        // GET /factures/{id} - Détail
         if ($method === 'GET' && $id) {
             $facture_id = (int)$id;
-            
-            // Recalculer les totaux
             $stmtTot = $pdo->prepare("SELECT COALESCE(SUM(quantite * prix_unitaire), 0) as total FROM lignes_facture WHERE facture_id = ?");
             $stmtTot->execute([$facture_id]);
             $totalLignes = $stmtTot->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
@@ -335,7 +340,6 @@ try {
             sendJSON(['success' => true, 'data' => $facture]);
         }
         
-        // POST /factures - Créer
         if ($method === 'POST' && !$id) {
             $table_id = isset($input['table_id']) ? (int)$input['table_id'] : 1;
             $utilisateur_id = isset($input['utilisateur_id']) ? (int)$input['utilisateur_id'] : 1;
@@ -353,7 +357,6 @@ try {
             sendJSON(['success' => true, 'data' => $stmt->fetch(), 'message' => 'Facture créée']);
         }
         
-        // POST /factures/{id}/lignes - Ajouter un produit
         if ($method === 'POST' && $id) {
             $parts2 = explode('/', $uri);
             $action = $parts2[2] ?? '';
@@ -373,7 +376,6 @@ try {
                 $stmt = $pdo->prepare("INSERT INTO lignes_facture (facture_id, produit_id, quantite, prix_unitaire) VALUES (?, ?, ?, ?)");
                 $stmt->execute([$facture_id, $produit_id, $quantite, $produit['prix']]);
                 
-                // Recalculer les totaux
                 recalculerFacture($pdo, $facture_id);
                 
                 $stmt = $pdo->prepare("SELECT sous_total, taxes, total FROM factures WHERE id = ?");
@@ -382,28 +384,12 @@ try {
             }
         }
         
-        // DELETE /factures/{id}/lignes/{ligne_id}
-        if ($method === 'DELETE' && $id) {
-            $parts2 = explode('/', $uri);
-            $ligne_id = $parts2[3] ?? null;
-            if ($ligne_id) {
-                $stmt = $pdo->prepare("DELETE FROM lignes_facture WHERE id = ? AND facture_id = ?");
-                $stmt->execute([$ligne_id, $id]);
-                recalculerFacture($pdo, $id);
-                sendJSON(['success' => true, 'message' => 'Ligne supprimée']);
-            }
-        }
-        
-        // PUT /factures/{id} - Payer
         if ($method === 'PUT' && $id) {
             $facture_id = (int)$id;
             $statut = isset($input['statut']) ? $input['statut'] : 'payée';
             $mode_paiement = isset($input['mode_paiement']) ? $input['mode_paiement'] : 'espèces';
             
-            // Recalculer les totaux avant paiement
             recalculerFacture($pdo, $facture_id);
-            
-            // Mettre à jour la facture
             $pdo->prepare("UPDATE factures SET statut = ?, mode_paiement = ? WHERE id = ?")->execute([$statut, $mode_paiement, $facture_id]);
             
             if ($statut === 'payée') {
@@ -415,7 +401,6 @@ try {
                 }
             }
             
-            // Retourner la facture mise à jour avec les totaux
             $stmt = $pdo->prepare("SELECT * FROM factures WHERE id = ?");
             $stmt->execute([$facture_id]);
             $facture = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -424,7 +409,7 @@ try {
     }
     
     // ============================================================
-    // 4. DASHBOARD
+    // 4. DASHBOARD - AVEC STATISTIQUES COMPLÈTES
     // ============================================================
     if ($resource === 'dashboard' && !$routeFound) {
         $routeFound = true;
@@ -436,7 +421,91 @@ try {
         $stats['reservations_aujourd_hui'] = $pdo->query("SELECT COUNT(*) FROM reservations WHERE date_reservation=CURDATE() AND statut!='annulée'")->fetchColumn() ?? 0;
         $stats['ca_semaine'] = $pdo->query("SELECT COALESCE(SUM(total),0) FROM factures WHERE WEEK(created_at)=WEEK(NOW()) AND YEAR(created_at)=YEAR(NOW()) AND statut='payée'")->fetchColumn() ?? 0;
         $stats['ca_mois'] = $pdo->query("SELECT COALESCE(SUM(total),0) FROM factures WHERE MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW()) AND statut='payée'")->fetchColumn() ?? 0;
-        $stats['top_produits'] = $pdo->query("SELECT p.nom, SUM(lf.quantite) as qte, SUM(lf.total_ligne) as ca FROM lignes_facture lf JOIN produits p ON p.id=lf.produit_id JOIN factures f ON f.id=lf.facture_id WHERE f.statut='payée' AND MONTH(f.created_at)=MONTH(NOW()) GROUP BY p.id ORDER BY qte DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+        
+        // TOP PRODUITS PAR QUANTITÉ
+        $stats['top_produits_qte'] = $pdo->query("
+            SELECT p.nom, p.code, SUM(lf.quantite) as qte, SUM(lf.total_ligne) as ca 
+            FROM lignes_facture lf 
+            JOIN produits p ON p.id = lf.produit_id 
+            JOIN factures f ON f.id = lf.facture_id 
+            WHERE f.statut='payée' AND MONTH(f.created_at)=MONTH(NOW()) 
+            GROUP BY p.id 
+            ORDER BY qte DESC 
+            LIMIT 10
+        ")->fetchAll(PDO::FETCH_ASSOC);
+        
+        // TOP PRODUITS PAR CHIFFRE D'AFFAIRES
+        $stats['top_produits_ca'] = $pdo->query("
+            SELECT p.nom, p.code, SUM(lf.quantite) as qte, SUM(lf.total_ligne) as ca 
+            FROM lignes_facture lf 
+            JOIN produits p ON p.id = lf.produit_id 
+            JOIN factures f ON f.id = lf.facture_id 
+            WHERE f.statut='payée' AND MONTH(f.created_at)=MONTH(NOW()) 
+            GROUP BY p.id 
+            ORDER BY ca DESC 
+            LIMIT 10
+        ")->fetchAll(PDO::FETCH_ASSOC);
+        
+        // BÉNÉFICIAIRE DU JOUR
+        $stmt = $pdo->query("SELECT COALESCE(SUM(total),0) as ca_total FROM factures WHERE DATE(created_at)=CURDATE() AND statut='payée'");
+        $ca_total = $stmt->fetchColumn() ?? 0;
+        
+        $stmt = $pdo->query("
+            SELECT COALESCE(SUM(lf.quantite * p.prix_achat), 0) as cout_total 
+            FROM lignes_facture lf 
+            JOIN produits p ON p.id = lf.produit_id 
+            JOIN factures f ON f.id = lf.facture_id 
+            WHERE f.statut='payée' AND DATE(f.created_at)=CURDATE()
+        ");
+        $cout_total = $stmt->fetchColumn() ?? 0;
+        
+        $stats['benefice'] = [
+            'ca_total' => $ca_total,
+            'cout_total' => $cout_total,
+            'benefice' => $ca_total - $cout_total,
+            'marge' => $ca_total > 0 ? round((($ca_total - $cout_total) / $ca_total) * 100, 2) : 0
+        ];
+        
+        // STATISTIQUES PAR CAISSIER
+        $stats['caissiers'] = $pdo->query("
+            SELECT c.id, c.nom, c.prenom,
+                   COUNT(DISTINCT f.id) as nb_ventes,
+                   COALESCE(SUM(f.total), 0) as montant_encaisse,
+                   COUNT(DISTINCT s.id) as nb_sessions
+            FROM caissiers c
+            LEFT JOIN factures f ON f.utilisateur_id = c.id AND DATE(f.created_at) = CURDATE() AND f.statut = 'payée'
+            LEFT JOIN sessions_caisse s ON s.caissier_id = c.id AND s.date_session = CURDATE()
+            WHERE c.actif = 1
+            GROUP BY c.id
+        ")->fetchAll(PDO::FETCH_ASSOC);
+        
+        // EMPLOI DU TEMPS DU JOUR
+        $jour = date('l');
+        $jours = ['Monday' => 'Lundi', 'Tuesday' => 'Mardi', 'Wednesday' => 'Mercredi', 'Thursday' => 'Jeudi', 'Friday' => 'Vendredi', 'Saturday' => 'Samedi', 'Sunday' => 'Dimanche'];
+        $jour_fr = $jours[$jour] ?? 'Lundi';
+        
+        $stats['emploi_temps_jour'] = $pdo->prepare("
+            SELECT e.*, c.nom, c.prenom 
+            FROM emploi_temps e 
+            JOIN caissiers c ON c.id = e.caissier_id 
+            WHERE e.jour_semaine = ? AND e.actif = 1
+            ORDER BY e.periode
+        ");
+        $stats['emploi_temps_jour']->execute([$jour_fr]);
+        $stats['emploi_temps_jour'] = $stats['emploi_temps_jour']->fetchAll(PDO::FETCH_ASSOC);
+        
+        // RUPTURES DU JOUR
+        $stats['ruptures_jour'] = $pdo->query("SELECT COUNT(*) FROM ruptures_stock WHERE date_rupture = CURDATE() AND traite = 0")->fetchColumn() ?? 0;
+        
+        // SESSIONS DU JOUR
+        $stats['sessions_jour'] = $pdo->query("
+            SELECT s.*, c.nom, c.prenom 
+            FROM sessions_caisse s 
+            JOIN caissiers c ON c.id = s.caissier_id 
+            WHERE s.date_session = CURDATE() 
+            ORDER BY s.heure_debut
+        ")->fetchAll(PDO::FETCH_ASSOC);
+        
         sendJSON(['success' => true, 'data' => $stats]);
     }
     
@@ -461,20 +530,62 @@ try {
     // ============================================================
     if ($resource === 'reservations' && !$routeFound) {
         $routeFound = true;
+        
         if ($method === 'GET') {
-            $date = $_GET['date'] ?? date('Y-m-d');
-            $stmt = $pdo->prepare("SELECT r.*, CONCAT(c.prenom,' ',c.nom) as client_nom, c.telephone, t.numero as table_num, t.capacite FROM reservations r LEFT JOIN clients c ON c.id=r.client_id LEFT JOIN tables_resto t ON t.id=r.table_id WHERE r.date_reservation=? ORDER BY r.heure_debut");
-            $stmt->execute([$date]);
+            $date_debut = $_GET['date_debut'] ?? date('Y-m-d');
+            $date_fin = $_GET['date_fin'] ?? date('Y-m-d');
+            
+            $stmt = $pdo->prepare("SELECT r.*, 
+                                   CONCAT(c.prenom,' ',c.nom) as client_nom, 
+                                   c.telephone, 
+                                   t.numero as table_num, 
+                                   t.capacite 
+                                   FROM reservations r 
+                                   LEFT JOIN clients c ON c.id = r.client_id 
+                                   LEFT JOIN tables_resto t ON t.id = r.table_id 
+                                   WHERE r.date_reservation BETWEEN ? AND ? 
+                                   ORDER BY r.date_reservation, r.heure_debut");
+            $stmt->execute([$date_debut, $date_fin]);
             sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
         }
+        
         if ($method === 'POST') {
+            $date_reservation = $input['date_reservation'];
+            $heure_debut = $input['heure_debut'];
+            $heure_fin = $input['heure_fin'] ?? null;
+            $table_id = $input['table_id'] ?? null;
+            
+            if ($table_id) {
+                $check = $pdo->prepare("SELECT COUNT(*) FROM reservations 
+                                        WHERE table_id = ? 
+                                        AND date_reservation = ? 
+                                        AND statut != 'annulée'
+                                        AND (
+                                            (heure_debut <= ? AND heure_fin >= ?) 
+                                            OR (heure_debut <= ? AND heure_fin >= ?)
+                                            OR (heure_debut >= ? AND heure_debut < ?)
+                                        )");
+                $check->execute([
+                    $table_id, 
+                    $date_reservation, 
+                    $heure_debut, $heure_debut,
+                    $heure_fin ?? $heure_debut, $heure_fin ?? $heure_debut,
+                    $heure_debut, $heure_fin ?? $heure_debut
+                ]);
+                $conflicts = $check->fetchColumn();
+                
+                if ($conflicts > 0) {
+                    sendJSON(['success' => false, 'error' => 'Cette table est déjà réservée à cette heure'], 409);
+                }
+            }
+            
             $stmt = $pdo->prepare("INSERT INTO reservations (client_id, table_id, date_reservation, heure_debut, heure_fin, nb_personnes, notes, statut) VALUES (?,?,?,?,?,?,?,?)");
             $stmt->execute([
                 $input['client_id'] ?? null,
                 $input['table_id'] ?? null,
-                $input['date_reservation'],
-                $input['heure_debut'],
-                $input['heure_fin'] ?? null,
+                $date_reservation,
+                $heure_debut,
+                $heure_fin ?? null,
                 $input['nb_personnes'] ?? 1,
                 $input['notes'] ?? null,
                 'confirmée'
@@ -526,7 +637,7 @@ try {
     }
     
     // ============================================================
-    // 8. FINANCIER
+    // 8. FINANCIER - AVEC TOP PRODUITS ET BÉNÉFICE
     // ============================================================
     if ($resource === 'financier' && !$routeFound) {
         $routeFound = true;
@@ -536,58 +647,345 @@ try {
         $report = [];
         $report['periode'] = ['debut' => $debut, 'fin' => $fin];
         
+        // Revenus
         $stmt = $pdo->prepare("SELECT COALESCE(SUM(total),0) as total, COALESCE(SUM(sous_total),0) as ht, COALESCE(SUM(taxes),0) as tva, COUNT(*) as nb_factures FROM factures WHERE statut='payée' AND DATE(created_at) BETWEEN ? AND ?");
         $stmt->execute([$debut, $fin]);
         $report['revenus'] = $stmt->fetch(PDO::FETCH_ASSOC);
         
+        // Par mode de paiement
         $stmt = $pdo->prepare("SELECT mode_paiement, COUNT(*) as nb, COALESCE(SUM(total),0) as montant FROM factures WHERE statut='payée' AND DATE(created_at) BETWEEN ? AND ? GROUP BY mode_paiement");
         $stmt->execute([$debut, $fin]);
         $report['par_mode'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        $stmt = $pdo->prepare("SELECT p.nom, p.code, SUM(lf.quantite) as qte, SUM(lf.total_ligne) as ca FROM lignes_facture lf JOIN produits p ON p.id=lf.produit_id JOIN factures f ON f.id=lf.facture_id WHERE f.statut='payée' AND DATE(f.created_at) BETWEEN ? AND ? GROUP BY p.id ORDER BY ca DESC LIMIT 10");
+        // TOP PRODUITS PAR QUANTITÉ
+        $stmt = $pdo->prepare("
+            SELECT p.nom, p.code, SUM(lf.quantite) as qte, SUM(lf.total_ligne) as ca 
+            FROM lignes_facture lf 
+            JOIN produits p ON p.id = lf.produit_id 
+            JOIN factures f ON f.id = lf.facture_id 
+            WHERE f.statut='payée' AND DATE(f.created_at) BETWEEN ? AND ? 
+            GROUP BY p.id 
+            ORDER BY qte DESC 
+            LIMIT 10
+        ");
         $stmt->execute([$debut, $fin]);
-        $report['top_produits'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $report['top_produits_qte'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        // TOP PRODUITS PAR CHIFFRE D'AFFAIRES
+        $stmt = $pdo->prepare("
+            SELECT p.nom, p.code, SUM(lf.quantite) as qte, SUM(lf.total_ligne) as ca 
+            FROM lignes_facture lf 
+            JOIN produits p ON p.id = lf.produit_id 
+            JOIN factures f ON f.id = lf.facture_id 
+            WHERE f.statut='payée' AND DATE(f.created_at) BETWEEN ? AND ? 
+            GROUP BY p.id 
+            ORDER BY ca DESC 
+            LIMIT 10
+        ");
+        $stmt->execute([$debut, $fin]);
+        $report['top_produits_ca'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Évolution
         $stmt = $pdo->prepare("SELECT DATE(created_at) as jour, SUM(total) as ca, COUNT(*) as nb FROM factures WHERE statut='payée' AND DATE(created_at) BETWEEN ? AND ? GROUP BY DATE(created_at) ORDER BY jour");
         $stmt->execute([$debut, $fin]);
         $report['evolution'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        $stmt = $pdo->prepare("SELECT c.nom as categorie, c.couleur, SUM(lf.total_ligne) as ca, SUM(lf.quantite) as qte FROM lignes_facture lf JOIN produits p ON p.id=lf.produit_id JOIN categories c ON c.id=p.categorie_id JOIN factures f ON f.id=lf.facture_id WHERE f.statut='payée' AND DATE(f.created_at) BETWEEN ? AND ? GROUP BY c.id ORDER BY ca DESC");
+        // Par catégorie
+        $stmt = $pdo->prepare("
+            SELECT c.nom as categorie, c.couleur, SUM(lf.total_ligne) as ca, SUM(lf.quantite) as qte 
+            FROM lignes_facture lf 
+            JOIN produits p ON p.id = lf.produit_id 
+            JOIN categories c ON c.id = p.categorie_id 
+            JOIN factures f ON f.id = lf.facture_id 
+            WHERE f.statut='payée' AND DATE(f.created_at) BETWEEN ? AND ? 
+            GROUP BY c.id 
+            ORDER BY ca DESC
+        ");
         $stmt->execute([$debut, $fin]);
         $report['par_categorie'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // BÉNÉFICIAIRE
+        $stmt = $pdo->prepare("SELECT COALESCE(SUM(total),0) as ca_total FROM factures WHERE statut='payée' AND DATE(created_at) BETWEEN ? AND ?");
+        $stmt->execute([$debut, $fin]);
+        $ca_total = $stmt->fetch(PDO::FETCH_ASSOC)['ca_total'] ?? 0;
+        
+        $stmt = $pdo->prepare("
+            SELECT COALESCE(SUM(lf.quantite * p.prix_achat), 0) as cout_total 
+            FROM lignes_facture lf 
+            JOIN produits p ON p.id = lf.produit_id 
+            JOIN factures f ON f.id = lf.facture_id 
+            WHERE f.statut='payée' AND DATE(f.created_at) BETWEEN ? AND ?
+        ");
+        $stmt->execute([$debut, $fin]);
+        $cout_total = $stmt->fetch(PDO::FETCH_ASSOC)['cout_total'] ?? 0;
+        
+        $report['benefice'] = [
+            'ca_total' => $ca_total,
+            'cout_total' => $cout_total,
+            'benefice' => $ca_total - $cout_total,
+            'marge' => $ca_total > 0 ? round((($ca_total - $cout_total) / $ca_total) * 100, 2) : 0
+        ];
+        
+        // Détail du bénéfice par produit
+        $stmt = $pdo->prepare("
+            SELECT p.nom, p.code, p.prix, p.prix_achat,
+                   SUM(lf.quantite) as qte_vendue,
+                   SUM(lf.quantite * p.prix) as ca_produit,
+                   SUM(lf.quantite * p.prix_achat) as cout_produit,
+                   SUM(lf.quantite * p.prix) - SUM(lf.quantite * p.prix_achat) as benefice_produit
+            FROM lignes_facture lf 
+            JOIN produits p ON p.id = lf.produit_id 
+            JOIN factures f ON f.id = lf.facture_id 
+            WHERE f.statut='payée' AND DATE(f.created_at) BETWEEN ? AND ?
+            GROUP BY p.id 
+            ORDER BY benefice_produit DESC
+        ");
+        $stmt->execute([$debut, $fin]);
+        $report['benefice_details'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         sendJSON(['success' => true, 'data' => $report]);
     }
     
     // ============================================================
-    // 9. Route par défaut
+    // 9. CAISSIERS
+    // ============================================================
+    if ($resource === 'caissiers' && !$routeFound) {
+        $routeFound = true;
+        
+        if ($method === 'GET' && !$id) {
+            $stmt = $pdo->query("SELECT * FROM caissiers WHERE actif = 1 ORDER BY nom");
+            sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        }
+        
+        if ($method === 'GET' && $id === 'emploi_temps') {
+            $stmt = $pdo->query("
+                SELECT e.*, c.nom, c.prenom 
+                FROM emploi_temps e 
+                JOIN caissiers c ON c.id = e.caissier_id 
+                ORDER BY FIELD(e.jour_semaine, 'Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'), e.periode
+            ");
+            sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        }
+        
+        // GET /caissiers/{id}/stats - Statistiques complètes d'un caissier
+        if ($method === 'GET' && $id && is_numeric($id) && isset($_GET['stats'])) {
+            $caissier_id = (int)$id;
+            $debut = $_GET['debut'] ?? date('Y-m-01');
+            $fin = $_GET['fin'] ?? date('Y-m-t');
+            
+            // Ventes du caissier
+            $stmt = $pdo->prepare("
+                SELECT 
+                    COUNT(DISTINCT f.id) as nb_ventes,
+                    COALESCE(SUM(f.total), 0) as montant_encaisse,
+                    COALESCE(AVG(f.total), 0) as panier_moyen
+                FROM factures f 
+                WHERE f.utilisateur_id = ? 
+                AND f.statut = 'payée' 
+                AND DATE(f.created_at) BETWEEN ? AND ?
+            ");
+            $stmt->execute([$caissier_id, $debut, $fin]);
+            $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Top produits vendus par ce caissier
+            $stmt = $pdo->prepare("
+                SELECT p.nom, p.code, SUM(lf.quantite) as qte, SUM(lf.total_ligne) as ca 
+                FROM lignes_facture lf 
+                JOIN produits p ON p.id = lf.produit_id 
+                JOIN factures f ON f.id = lf.facture_id 
+                WHERE f.utilisateur_id = ? 
+                AND f.statut = 'payée' 
+                AND DATE(f.created_at) BETWEEN ? AND ?
+                GROUP BY p.id 
+                ORDER BY ca DESC 
+                LIMIT 10
+            ");
+            $stmt->execute([$caissier_id, $debut, $fin]);
+            $stats['top_produits'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Evolution quotidienne
+            $stmt = $pdo->prepare("
+                SELECT DATE(f.created_at) as jour, 
+                       COUNT(DISTINCT f.id) as nb_ventes,
+                       COALESCE(SUM(f.total), 0) as montant_encaisse
+                FROM factures f 
+                WHERE f.utilisateur_id = ? 
+                AND f.statut = 'payée' 
+                AND DATE(f.created_at) BETWEEN ? AND ?
+                GROUP BY DATE(f.created_at) 
+                ORDER BY jour
+            ");
+            $stmt->execute([$caissier_id, $debut, $fin]);
+            $stats['evolution'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Sessions du caissier
+            $stmt = $pdo->prepare("
+                SELECT * FROM sessions_caisse 
+                WHERE caissier_id = ? 
+                AND date_session BETWEEN ? AND ?
+                ORDER BY date_session DESC
+            ");
+            $stmt->execute([$caissier_id, $debut, $fin]);
+            $stats['sessions'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            sendJSON(['success' => true, 'data' => $stats]);
+        }
+        
+        // GET /caissiers/{id}/sessions
+        if ($method === 'GET' && $id && is_numeric($id) && !isset($_GET['stats'])) {
+            $stmt = $pdo->prepare("
+                SELECT s.*, 
+                    (SELECT COUNT(*) FROM factures WHERE utilisateur_id = s.caissier_id AND DATE(created_at) = s.date_session AND statut = 'payée') as nb_ventes,
+                    (SELECT COALESCE(SUM(total), 0) FROM factures WHERE utilisateur_id = s.caissier_id AND DATE(created_at) = s.date_session AND statut = 'payée') as montant_encaisse
+                FROM sessions_caisse s 
+                WHERE s.caissier_id = ? 
+                ORDER BY s.date_session DESC
+            ");
+            $stmt->execute([$id]);
+            sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        }
+        
+        if ($method === 'POST' && $id === 'session') {
+            $caissier_id = $input['caissier_id'] ?? 0;
+            $montant_initial = $input['montant_initial'] ?? 0;
+            
+            $check = $pdo->prepare("SELECT id FROM sessions_caisse WHERE caissier_id = ? AND statut = 'ouverte' AND date_session = CURDATE()");
+            $check->execute([$caissier_id]);
+            if ($check->fetch()) {
+                sendJSON(['success' => false, 'error' => 'Une session est déjà ouverte pour ce caissier'], 400);
+            }
+            
+            $stmt = $pdo->prepare("INSERT INTO sessions_caisse (caissier_id, date_session, heure_debut, montant_initial) VALUES (?, CURDATE(), CURTIME(), ?)");
+            $stmt->execute([$caissier_id, $montant_initial]);
+            $newId = $pdo->lastInsertId();
+            
+            sendJSON(['success' => true, 'id' => $newId, 'message' => 'Session ouverte avec succès']);
+        }
+        
+        if ($method === 'PUT' && strpos($uri, 'session') !== false) {
+            $parts2 = explode('/', $uri);
+            $session_id = $parts2[3] ?? null;
+            if ($session_id) {
+                $montant_final = $input['montant_final'] ?? 0;
+                $stmt = $pdo->prepare("UPDATE sessions_caisse SET heure_fin = CURTIME(), montant_final = ?, statut = 'fermee' WHERE id = ?");
+                $stmt->execute([$montant_final, $session_id]);
+                sendJSON(['success' => true, 'message' => 'Session fermée avec succès']);
+            }
+        }
+    }
+    
+    // ============================================================
+    // 10. QRCODES
+    // ============================================================
+    if ($resource === 'qrcodes' && !$routeFound) {
+        $routeFound = true;
+        
+        if ($method === 'GET' && !$id) {
+            $stmt = $pdo->query("
+                SELECT q.*, c.nom, c.prenom, c.telephone 
+                FROM qrcodes_clients q 
+                JOIN clients c ON c.id = q.client_id 
+                WHERE q.actif = 1 
+                ORDER BY q.created_at DESC
+            ");
+            sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        }
+        
+        if ($method === 'POST') {
+            $code_qr = 'QR-' . date('YmdHis') . '-' . uniqid() . '-' . rand(1000, 9999);
+            $client_id = $input['client_id'] ?? 0;
+            $solde = $input['solde'] ?? 0;
+            
+            $check = $pdo->prepare("SELECT id FROM qrcodes_clients WHERE client_id = ? AND actif = 1");
+            $check->execute([$client_id]);
+            if ($check->fetch()) {
+                sendJSON(['success' => false, 'error' => 'Ce client a déjà un QR code actif'], 400);
+            }
+            
+            $stmt = $pdo->prepare("INSERT INTO qrcodes_clients (client_id, code_qr, solde) VALUES (?, ?, ?)");
+            $stmt->execute([$client_id, $code_qr, $solde]);
+            $newId = $pdo->lastInsertId();
+            
+            sendJSON([
+                'success' => true, 
+                'id' => $newId, 
+                'code_qr' => $code_qr,
+                'message' => 'QR code généré avec succès'
+            ]);
+        }
+    }
+    
+    // ============================================================
+    // 11. RUPTURES DE STOCK
+    // ============================================================
+    if ($resource === 'ruptures' && !$routeFound) {
+        $routeFound = true;
+        
+        if ($method === 'GET' && !$id) {
+            $stmt = $pdo->query("
+                SELECT r.*, p.nom as produit_nom, p.code as produit_code, 
+                       CONCAT(c.prenom,' ',c.nom) as client_nom
+                FROM ruptures_stock r 
+                LEFT JOIN produits p ON p.id = r.produit_id 
+                LEFT JOIN clients c ON c.id = r.client_id 
+                ORDER BY r.created_at DESC
+            ");
+            sendJSON(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        }
+        
+        if ($method === 'POST') {
+            $stmt = $pdo->prepare("INSERT INTO ruptures_stock (produit_id, quantite_demandee, quantite_disponible, client_id, date_rupture, notes) VALUES (?, ?, ?, ?, CURDATE(), ?)");
+            $stmt->execute([
+                $input['produit_id'] ?? 0,
+                $input['quantite_demandee'] ?? 1,
+                $input['quantite_disponible'] ?? 0,
+                $input['client_id'] ?? null,
+                $input['notes'] ?? ''
+            ]);
+            sendJSON(['success' => true, 'id' => $pdo->lastInsertId(), 'message' => 'Rupture signalée']);
+        }
+        
+        if ($method === 'PUT' && $id) {
+            $stmt = $pdo->prepare("UPDATE ruptures_stock SET traite = 1 WHERE id = ?");
+            $stmt->execute([$id]);
+            sendJSON(['success' => true, 'message' => 'Rupture marquée comme traitée']);
+        }
+    }
+    
+    // ============================================================
+    // 12. Route par défaut
     // ============================================================
     if (!$routeFound) {
         sendJSON([
             'success' => true,
-            'message' => 'API Restaurant - POS v3.0',
-            'version' => '3.0 - CRUD complet',
+            'message' => 'API Restaurant - POS v3.5',
+            'version' => '3.5 - Statistiques complètes',
             'endpoints' => [
+                'POST /api/login' => 'Authentification caissier',
                 'GET /api/produits' => 'Liste des produits',
-                'GET /api/produits/{id}' => 'Détail produit',
                 'POST /api/produits' => 'Créer un produit',
                 'PUT /api/produits/{id}' => 'Modifier un produit',
                 'DELETE /api/produits/{id}' => 'Supprimer un produit',
                 'GET /api/categories' => 'Liste des catégories',
-                'POST /api/factures' => 'Créer une commande',
+                'GET /api/factures' => 'Liste des factures',
+                'POST /api/factures' => 'Créer une facture',
                 'POST /api/factures/{id}/lignes' => 'Ajouter un produit',
-                'GET /api/factures' => 'Toutes les factures',
-                'GET /api/factures/{id}' => 'Détail facture',
-                'PUT /api/factures/{id}' => 'Payer facture',
-                'GET /api/dashboard' => 'Tableau de bord',
+                'PUT /api/factures/{id}' => 'Payer une facture',
+                'GET /api/dashboard' => 'Tableau de bord complet',
                 'GET /api/tables' => 'Liste des tables',
-                'GET /api/reservations' => 'Réservations',
-                'POST /api/reservations' => 'Créer réservation',
+                'GET /api/reservations' => 'Réservations par période',
+                'POST /api/reservations' => 'Créer une réservation',
                 'GET /api/clients' => 'Liste des clients',
-                'POST /api/clients' => 'Créer client',
-                'PUT /api/clients/{id}' => 'Modifier client',
-                'DELETE /api/clients/{id}' => 'Supprimer client',
-                'GET /api/financier' => 'État financier'
+                'POST /api/clients' => 'Créer un client',
+                'GET /api/financier' => 'État financier complet',
+                'GET /api/caissiers' => 'Liste des caissiers',
+                'GET /api/caissiers/emploi_temps' => 'Emploi du temps',
+                'GET /api/caissiers/{id}/stats' => 'Statistiques d\'un caissier',
+                'POST /api/caissiers/session' => 'Ouvrir une session',
+                'GET /api/qrcodes' => 'Liste des QR codes',
+                'POST /api/qrcodes' => 'Générer un QR code',
+                'GET /api/ruptures' => 'Liste des ruptures',
+                'POST /api/ruptures' => 'Signaler une rupture'
             ]
         ]);
     }
