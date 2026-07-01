@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Statistiques Caissiers - RestauManager</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .header h1 { font-size: 18px; font-weight: 600; }
+        .header a { color: #e94560; text-decoration: none; font-weight: 600; }
+        .header a:hover { text-decoration: underline; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+        .filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .filters .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        .filters label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .filters select, .filters input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .filters select:focus, .filters input:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: #4a90d9; color: white; }
+        .btn-primary:hover { background: #357abd; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-success:hover { background: #219a52; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            text-align: center;
+            border-left: 4px solid #4a90d9;
+        }
+        .stat-card .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a1a2e;
+        }
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .stat-card .stat-icon { font-size: 30px; margin-bottom: 6px; }
+        .stat-card.green { border-left-color: #27ae60; }
+        .stat-card.orange { border-left-color: #f39c12; }
+        .stat-card.red { border-left-color: #e74c3c; }
+        .stat-card.purple { border-left-color: #8b5cf6; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        table th {
+            background: #1a1a2e;
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        table tr:hover td { background: #f0f7ff; }
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-success { background: #27ae60; color: white; }
+        .badge-warning { background: #f39c12; color: white; }
+        .badge-danger { background: #e74c3c; color: white; }
+        .badge-info { background: #4a90d9; color: white; }
+        .total-caissier {
+            font-weight: 700;
+            color: #e94560;
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .mt-16 { margin-top: 16px; }
+        .mb-16 { margin-bottom: 16px; }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+        .classement-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .classement-item .position {
+            font-weight: 800;
+            font-size: 18px;
+            color: #1a1a2e;
+            min-width: 30px;
+        }
+        .classement-item .nom {
+            flex: 1;
+            font-weight: 600;
+        }
+        .classement-item .montant {
+            font-weight: 700;
+            color: #e94560;
+        }
+        @media (max-width: 768px) {
+            .filters { flex-direction: column; }
+            .filters .form-group { min-width: 100%; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Statistiques des caissiers</h1>
+        <div>
+            <a href="/">🏠 Retour au POS</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Filtres -->
+        <div class="card">
+            <div class="card-title">🔍 Filtres</div>
+            <div class="filters">
+                <div class="form-group">
+                    <label>👤 Caissier</label>
+                    <select id="caissierSelect">
+                        <option value="">Tous les caissiers</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📅 Date début</label>
+                    <input type="date" id="dateDebut">
+                </div>
+                <div class="form-group">
+                    <label>📅 Date fin</label>
+                    <input type="date" id="dateFin">
+                </div>
+                <div style="display:flex; gap:8px; align-items:flex-end;">
+                    <button class="btn btn-primary" onclick="loadStats()">🔍 Générer</button>
+                    <button class="btn btn-success" onclick="loadStats()">📊 Actualiser</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résultats -->
+        <div id="results">
+            <div class="loading">⏳ Chargement des données...</div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== API ====================
+        async function apiCall(url, opts = {}) {
+            try {
+                const res = await fetch(url, {
+                    headers: { 'Content-Type': 'application/json' },
+                    ...opts
+                });
+                const data = await res.json();
+                if (!data.success && !res.ok) throw new Error(data.error || 'Erreur API');
+                return data;
+            } catch (e) {
+                console.error('API Error:', e);
+                document.getElementById('results').innerHTML = `<div class="card"><div class="no-data">❌ Erreur: ${e.message}</div></div>`;
+                return { success: false, error: e.message };
+            }
+        }
+
+        // ==================== CHARGEMENT ====================
+        async function loadCaissiers() {
+            const res = await apiCall('/api/caissiers');
+            if (res.success) {
+                const select = document.getElementById('caissierSelect');
+                select.innerHTML = '<option value="">Tous les caissiers</option>';
+                res.data.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.prenom} ${c.nom}</option>`;
+                });
+            }
+        }
+
+        async function loadStats() {
+            const caissier_id = document.getElementById('caissierSelect').value;
+            const date_debut = document.getElementById('dateDebut').value;
+            const date_fin = document.getElementById('dateFin').value;
+
+            if (!date_debut || !date_fin) {
+                alert('Veuillez sélectionner une période');
+                return;
+            }
+
+            document.getElementById('results').innerHTML = '<div class="loading">⏳ Chargement des données...</div>';
+
+            let url = `/api/stats_caissiers?date_debut=${date_debut}&date_fin=${date_fin}`;
+            if (caissier_id) {
+                url += `&caissier_id=${caissier_id}`;
+            }
+
+            const res = await apiCall(url);
+            if (res.success) {
+                renderStats(res.data);
+            }
+        }
+
+        // ==================== AFFICHAGE ====================
+        function renderStats(data) {
+            const container = document.getElementById('results');
+            const global = data.global || {};
+            const parJour = data.par_jour || [];
+            const topProduits = data.top_produits || [];
+            const parCategorie = data.par_categorie || [];
+            const sessions = data.sessions || [];
+            const classement = data.classement || [];
+            const recapCaissiers = data.recap_caissiers || [];
+            const caissierInfo = data.caissier_selectionne;
+            const periode = data.periode || {};
+
+            let html = '';
+
+            // Info caissier sélectionné
+            if (caissierInfo) {
+                html += `
+                    <div class="card">
+                        <div class="card-title">👤 ${caissierInfo.prenom} ${caissierInfo.nom}</div>
+                        <p style="color:#666;">${caissierInfo.email}</p>
+                    </div>
+                `;
+            }
+
+            // Statistiques globales
+            html += `
+                <div class="stats-grid">
+                    <div class="stat-card green">
+                        <div class="stat-icon">🧾</div>
+                        <div class="stat-number">${global.nb_ventes || 0}</div>
+                        <div class="stat-label">Ventes totales</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-number">${Number(global.montant_total || 0).toLocaleString()} FCFA</div>
+                        <div class="stat-label">Montant total</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-number">${Number(global.panier_moyen || 0).toLocaleString()} FCFA</div>
+                        <div class="stat-label">Panier moyen</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-number">${global.nb_jours_actifs || 0}</div>
+                        <div class="stat-label">Jours actifs</div>
+                    </div>
+                </div>
+            `;
+
+            // Évolution par jour
+            if (parJour.length > 0) {
+                html += `
+                    <div class="card">
+                        <div class="card-title">📈 Évolution quotidienne</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th class="text-center">Nombre de ventes</th>
+                                    <th class="text-right">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${parJour.map(j => `
+                                    <tr>
+                                        <td><strong>${j.jour}</strong></td>
+                                        <td class="text-center"><span class="badge badge-info">${j.nb_ventes}</span></td>
+                                        <td class="text-right">${Number(j.montant).toLocaleString()} FCFA</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                            <tfoot style="font-weight:700;background:#f8f9fa;">
+                                <tr>
+                                    <td><strong>TOTAL</strong></td>
+                                    <td class="text-center"><strong>${parJour.reduce((sum, j) => sum + parseInt(j.nb_ventes), 0)}</strong></td>
+                                    <td class="text-right"><strong>${parJour.reduce((sum, j) => sum + parseFloat(j.montant), 0).toLocaleString()} FCFA</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // Top produits
+            if (topProduits.length > 0) {
+                html += `
+                    <div class="card">
+                        <div class="card-title">🏆 Top produits vendus</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Produit</th>
+                                    <th>Code</th>
+                                    <th class="text-center">Quantité</th>
+                                    <th class="text-right">CA</th>
+                                    <th class="text-center">Commandes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${topProduits.map((p, i) => `
+                                    <tr>
+                                        <td><strong>${i + 1}</strong></td>
+                                        <td><strong>${p.nom}</strong></td>
+                                        <td><small>${p.code}</small></td>
+                                        <td class="text-center"><span class="badge badge-success">${p.qte_totale}</span></td>
+                                        <td class="text-right">${Number(p.ca_total).toLocaleString()} FCFA</td>
+                                        <td class="text-center"><span class="badge badge-info">${p.nb_commandes}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // Ventes par catégorie
+            if (parCategorie.length > 0) {
+                html += `
+                    <div class="card">
+                        <div class="card-title">📂 Ventes par catégorie</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Catégorie</th>
+                                    <th class="text-center">Quantité</th>
+                                    <th class="text-right">CA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${parCategorie.map(c => `
+                                    <tr>
+                                        <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${c.couleur};margin-right:8px;"></span>${c.categorie}</td>
+                                        <td class="text-center"><span class="badge badge-warning">${c.qte_totale}</span></td>
+                                        <td class="text-right">${Number(c.ca_total).toLocaleString()} FCFA</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // Récapitulatif par caissier
+            if (recapCaissiers.length > 0 && !caissierInfo) {
+                html += `
+                    <div class="card">
+                        <div class="card-title">👥 Récapitulatif par caissier</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Caissier</th>
+                                    <th class="text-center">Ventes</th>
+                                    <th class="text-right">Montant total</th>
+                                    <th class="text-center">Sessions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${recapCaissiers.map(c => `
+                                    <tr>
+                                        <td><strong>${c.prenom} ${c.nom}</strong></td>
+                                        <td class="text-center"><span class="badge badge-info">${c.nb_ventes}</span></td>
+                                        <td class="text-right total-caissier">${Number(c.montant_total).toLocaleString()} FCFA</td>
+                                        <td class="text-center"><span class="badge badge-warning">${c.nb_sessions}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                            <tfoot style="font-weight:700;background:#f8f9fa;">
+                                <tr>
+                                    <td><strong>TOTAL</strong></td>
+                                    <td class="text-center"><strong>${recapCaissiers.reduce((sum, c) => sum + parseInt(c.nb_ventes), 0)}</strong></td>
+                                    <td class="text-right"><strong>${recapCaissiers.reduce((sum, c) => sum + parseFloat(c.montant_total), 0).toLocaleString()} FCFA</strong></td>
+                                    <td class="text-center"><strong>${recapCaissiers.reduce((sum, c) => sum + parseInt(c.nb_sessions), 0)}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // Classement des caissiers
+            if (classement.length > 0 && caissierInfo) {
+                html += `
+                    <div class="card">
+                        <div class="card-title">🏅 Classement des caissiers</div>
+                        ${classement.map((c, i) => `
+                            <div class="classement-item">
+                                <div class="position">#${i + 1}</div>
+                                <div class="nom">${c.prenom} ${c.nom}</div>
+                                <div class="montant">${Number(c.montant_total).toLocaleString()} FCFA</div>
+                                <span class="badge badge-info">${c.nb_ventes} ventes</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // Sessions
+            if (sessions.length > 0) {
+                html += `
+                    <div class="card">
+                        <div class="card-title">🕐 Sessions de caisse</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Début</th>
+                                    <th>Fin</th>
+                                    <th>Statut</th>
+                                    <th class="text-center">Ventes</th>
+                                    <th class="text-right">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${sessions.map(s => `
+                                    <tr>
+                                        <td>${s.date_session}</td>
+                                        <td>${s.heure_debut}</td>
+                                        <td>${s.heure_fin || '-'}</td>
+                                        <td><span class="badge ${s.statut === 'ouverte' ? 'badge-success' : s.statut === 'fermee' ? 'badge-warning' : 'badge-danger'}">${s.statut}</span></td>
+                                        <td class="text-center"><span class="badge badge-info">${s.nb_ventes_jour || 0}</span></td>
+                                        <td class="text-right">${Number(s.montant_jour || 0).toLocaleString()} FCFA</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // Si aucune donnée
+            if (!parJour.length && !topProduits.length && !recapCaissiers.length) {
+                html += `
+                    <div class="card">
+                        <div class="no-data">📭 Aucune donnée disponible pour cette période</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Définir les dates par défaut (mois en cours)
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+            document.getElementById('dateDebut').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('dateFin').value = lastDay.toISOString().split('T')[0];
+
+            loadCaissiers();
+            loadStats();
+        });
+    </script>
+</body>
+</html>

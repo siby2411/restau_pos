@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Paiement QR Code - RestauManager</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            padding: 25px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        .subtitle { font-size: 14px; opacity: 0.6; margin-bottom: 20px; }
+        .scanner-area {
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: rgba(0,0,0,0.3);
+            position: relative;
+        }
+        #video { width: 100%; max-width: 350px; border-radius: 10px; display: none; transform: scaleX(-1); }
+        .scanner-icon { font-size: 48px; opacity: 0.5; }
+        .scan-result {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            width: 100%;
+            word-break: break-all;
+            font-size: 12px;
+        }
+        .scan-result.success { display: block; background: rgba(46,204,113,0.2); border: 1px solid #2ecc71; color: #2ecc71; }
+        .scan-result.error { display: block; background: rgba(231,76,60,0.2); border: 1px solid #e74c3c; color: #e74c3c; }
+        .scan-result.info { display: block; background: rgba(52,152,219,0.2); border: 1px solid #3498db; color: #3498db; }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 5px;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: #4a90d9; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: white; }
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .btn-group .btn { flex: 1; min-width: 100px; }
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .info-card .label { font-size: 12px; opacity: 0.6; }
+        .info-card .value { font-size: 18px; font-weight: 600; margin-top: 4px; }
+        .info-card .value.total { color: #2ecc71; font-size: 24px; }
+        #paymentInfo { display: none; }
+        #message { margin-top: 15px; font-size: 14px; opacity: 0.8; min-height: 24px; }
+        .hidden { display: none; }
+        .file-upload {
+            margin: 10px 0;
+            padding: 15px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-upload:hover { border-color: #4a90d9; background: rgba(74,144,217,0.1); }
+        .file-upload input { display: none; }
+        .preview-container {
+            margin: 10px 0;
+            display: none;
+        }
+        .preview-container img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .debug-info {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 10px;
+            text-align: left;
+            max-height: 100px;
+            overflow-y: auto;
+            display: none;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        @media (max-width: 480px) {
+            .container { padding: 15px; }
+            .btn-group .btn { min-width: 80px; font-size: 13px; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">Ω OMEGA CONSULTING</div>
+        <div class="subtitle">📱 Paiement par QR Code</div>
+
+        <div class="scanner-area" id="scannerArea">
+            <video id="video" playsinline></video>
+            <div id="placeholder">
+                <div class="scanner-icon">📷</div>
+                <p style="margin-top:10px;opacity:0.6;">Scannez un QR Code</p>
+            </div>
+            <div id="scanResult" class="scan-result"></div>
+        </div>
+
+        <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+            <span>📁 Choisir une image QR Code</span>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <div class="preview-container" id="previewContainer">
+            <img id="previewImage">
+            <p style="font-size:12px;opacity:0.6;margin-top:5px;">Image chargée</p>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="startScanner()">📷 Scanner</button>
+            <button class="btn btn-danger" onclick="stopScanner()">⏹ Arrêter</button>
+            <button class="btn btn-secondary" onclick="resetAll()">🔄 Réinitialiser</button>
+        </div>
+
+        <div id="message">📱 Cliquez sur "Scanner" ou chargez une image</div>
+
+        <div id="paymentInfo">
+            <div class="info-card"><div class="label">Facture</div><div class="value" id="factureNumero">-</div></div>
+            <div class="info-card"><div class="label">Table</div><div class="value" id="factureTable">-</div></div>
+            <div class="info-card"><div class="label">Montant</div><div class="value total" id="factureTotal">-</div></div>
+            <button class="btn btn-success" onclick="confirmerPaiement()" style="width:100%;padding:15px;font-size:18px;">
+                💳 Confirmer le paiement
+            </button>
+        </div>
+
+        <div class="debug-info" id="debugInfo"></div>
+    </div>
+
+    <script>
+        let video = document.getElementById('video');
+        let scannerActive = false;
+        let scanTimeout = null;
+        let scannedData = null;
+        let stream = null;
+
+        function debug(msg) {
+            const debugEl = document.getElementById('debugInfo');
+            debugEl.style.display = 'block';
+            debugEl.innerHTML += '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n';
+            console.log(msg);
+        }
+
+        function showMessage(msg, type = 'info') {
+            document.getElementById('message').textContent = msg;
+            document.getElementById('message').style.color = type === 'success' ? '#2ecc71' : 
+                                                            type === 'error' ? '#e74c3c' : 
+                                                            type === 'warning' ? '#f39c12' : 'rgba(255,255,255,0.8)';
+        }
+
+        function resetAll() {
+            stopScanner();
+            scannedData = null;
+            document.getElementById('paymentInfo').style.display = 'none';
+            document.getElementById('scanResult').className = 'scan-result';
+            document.getElementById('scanResult').style.display = 'none';
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('previewImage').src = '';
+            document.getElementById('debugInfo').style.display = 'none';
+            document.getElementById('debugInfo').innerHTML = '';
+            document.getElementById('fileInput').value = '';
+            showMessage('🔄 Réinitialisé');
+        }
+
+        // ==================== DECODAGE QR ====================
+        function decodeQRData(data) {
+            debug('Données brutes: ' + data.substring(0, 100) + '...');
+            
+            try {
+                // Nettoyer les données
+                let cleanData = data.trim();
+                
+                // Vérifier si c'est une URL
+                let qrData = null;
+                let qParam = null;
+                
+                // Si c'est une URL, extraire le paramètre q
+                if (cleanData.startsWith('http://') || cleanData.startsWith('https://')) {
+                    debug('C\'est une URL, extraction du paramètre q...');
+                    const url = new URL(cleanData);
+                    qParam = url.searchParams.get('q');
+                    if (qParam) {
+                        debug('Paramètre q trouvé: ' + qParam.substring(0, 50) + '...');
+                        cleanData = qParam;
+                    } else {
+                        debug('Pas de paramètre q dans l\'URL');
+                        return null;
+                    }
+                }
+                
+                // Décoder le base64
+                let decoded;
+                try {
+                    // Essayer de décoder directement
+                    decoded = atob(cleanData);
+                    debug('Décodage base64 réussi');
+                } catch (e) {
+                    // Essayer avec decodeURIComponent
+                    try {
+                        const decodedUri = decodeURIComponent(cleanData);
+                        decoded = atob(decodedUri);
+                        debug('Décodage avec decodeURIComponent réussi');
+                    } catch (e2) {
+                        // Essayer en remplaçant les caractères problématiques
+                        try {
+                            const fixed = cleanData.replace(/-/g, '+').replace(/_/g, '/');
+                            decoded = atob(fixed);
+                            debug('Décodage avec remplacement réussi');
+                        } catch (e3) {
+                            debug('Erreur de décodage: ' + e3.message);
+                            return null;
+                        }
+                    }
+                }
+                
+                // Parser le JSON
+                qrData = JSON.parse(decoded);
+                debug('JSON parsé avec succès');
+                
+                // Vérifier le format
+                if (qrData.t === 'p') {
+                    return {
+                        type: 'paiement',
+                        facture_id: parseInt(qrData.i),
+                        numero: qrData.n,
+                        total: parseFloat(qrData.m),
+                        table: qrData.table || 'N/A'
+                    };
+                }
+                
+                return qrData;
+                
+            } catch (e) {
+                debug('Erreur de décodage: ' + e.message);
+                return null;
+            }
+        }
+
+        // ==================== SCANNEUR ====================
+        async function startScanner() {
+            try {
+                if (stream) { stream.getTracks().forEach(track => track.stop()); }
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                document.getElementById('placeholder').style.display = 'none';
+                document.getElementById('scanResult').className = 'scan-result info';
+                document.getElementById('scanResult').textContent = '🔍 Recherche...';
+                document.getElementById('scanResult').style.display = 'block';
+                showMessage('🔍 Scan en cours...', 'info');
+                scannerActive = true;
+                scanQRCode();
+            } catch (err) {
+                showMessage('❌ Erreur caméra: ' + err.message, 'error');
+            }
+        }
+
+        function stopScanner() {
+            if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+            video.style.display = 'none';
+            document.getElementById('placeholder').style.display = 'block';
+            scannerActive = false;
+            if (scanTimeout) { clearTimeout(scanTimeout); scanTimeout = null; }
+            showMessage('⏹ Scanner arrêté', 'info');
+        }
+
+        function scanQRCode() {
+            if (!scannerActive) return;
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "attemptBoth",
+                });
+                
+                if (code && code.data) {
+                    debug('QR Code trouvé: ' + code.data.substring(0, 80) + '...');
+                    const qrData = decodeQRData(code.data);
+                    if (qrData && qrData.type === 'paiement' && qrData.facture_id) {
+                        scannedData = qrData;
+                        document.getElementById('scanResult').className = 'scan-result success';
+                        document.getElementById('scanResult').textContent = '✅ QR Code détecté !';
+                        document.getElementById('scanResult').style.display = 'block';
+                        showMessage('✅ Facture ' + qrData.numero + ' trouvée', 'success');
+                        
+                        document.getElementById('paymentInfo').style.display = 'block';
+                        document.getElementById('factureNumero').textContent = qrData.numero || 'N/A';
+                        document.getElementById('factureTotal').textContent = Number(qrData.total).toLocaleString() + ' FCFA';
+                        document.getElementById('factureTable').textContent = qrData.table || 'N/A';
+                        
+                        stopScanner();
+                        return;
+                    }
+                }
+            }
+            scanTimeout = setTimeout(scanQRCode, 200);
+        }
+
+        // ==================== UPLOAD IMAGE ====================
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            debug('Fichier sélectionné: ' + file.name + ' (' + file.size + ' bytes)');
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // Afficher l'aperçu
+                    document.getElementById('previewImage').src = event.target.result;
+                    document.getElementById('previewContainer').style.display = 'block';
+                    showMessage('🔍 Analyse de l\'image...', 'info');
+                    debug('Image chargée: ' + img.width + 'x' + img.height);
+                    
+                    // Analyser l'image avec jsQR
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    let found = false;
+                    const attempts = [
+                        { inversionAttempts: "attemptBoth" },
+                        { inversionAttempts: "dontInvert" },
+                        { inversionAttempts: "invert" }
+                    ];
+                    
+                    for (const attempt of attempts) {
+                        debug('Tentative avec paramètres: ' + JSON.stringify(attempt));
+                        const code = jsQR(imageData.data, imageData.width, imageData.height, attempt);
+                        if (code && code.data) {
+                            debug('QR Code trouvé dans l\'image: ' + code.data.substring(0, 80) + '...');
+                            const qrData = decodeQRData(code.data);
+                            if (qrData && qrData.type === 'paiement' && qrData.facture_id) {
+                                scannedData = qrData;
+                                document.getElementById('scanResult').className = 'scan-result success';
+                                document.getElementById('scanResult').textContent = '✅ QR Code détecté !';
+                                document.getElementById('scanResult').style.display = 'block';
+                                showMessage('✅ Facture ' + qrData.numero + ' trouvée', 'success');
+                                
+                                document.getElementById('paymentInfo').style.display = 'block';
+                                document.getElementById('factureNumero').textContent = qrData.numero || 'N/A';
+                                document.getElementById('factureTotal').textContent = Number(qrData.total).toLocaleString() + ' FCFA';
+                                document.getElementById('factureTable').textContent = qrData.table || 'N/A';
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!found) {
+                        showMessage('❌ Aucun QR Code valide trouvé dans l\'image', 'error');
+                        document.getElementById('scanResult').className = 'scan-result error';
+                        document.getElementById('scanResult').textContent = '❌ Aucun QR Code trouvé';
+                        document.getElementById('scanResult').style.display = 'block';
+                        debug('Aucun QR Code trouvé dans l\'image après ' + attempts.length + ' tentatives');
+                    }
+                };
+                img.onerror = function(err) {
+                    debug('Erreur de chargement de l\'image: ' + err);
+                    showMessage('❌ Erreur de chargement de l\'image', 'error');
+                };
+                img.src = event.target.result;
+            };
+            reader.onerror = function(err) {
+                debug('Erreur de lecture du fichier: ' + err);
+                showMessage('❌ Erreur de lecture du fichier', 'error');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ==================== PAIEMENT ====================
+        async function confirmerPaiement() {
+            if (!scannedData) {
+                showMessage('❌ Aucun QR Code scanné', 'error');
+                return;
+            }
+            
+            if (!confirm(`Confirmer le paiement de ${Number(scannedData.total).toLocaleString()} FCFA pour la facture ${scannedData.numero} ?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/factures/${scannedData.facture_id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ statut: 'payée', mode_paiement: 'qrcode' })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('✅ Paiement effectué avec succès !', 'success');
+                    document.getElementById('paymentInfo').style.display = 'none';
+                    setTimeout(() => { window.location.href = '/'; }, 3000);
+                } else {
+                    showMessage('❌ Erreur: ' + (data.error || 'Paiement échoué'), 'error');
+                }
+            } catch (err) {
+                showMessage('❌ Erreur: ' + err.message, 'error');
+            }
+        }
+
+        // ==================== CHARGEMENT URL ====================
+        const urlParams = new URLSearchParams(window.location.search);
+        const qrParam = urlParams.get('q');
+        if (qrParam) {
+            debug('QR Code depuis URL: ' + qrParam.substring(0, 50) + '...');
+            const qrData = decodeQRData(qrParam);
+            if (qrData && qrData.type === 'paiement' && qrData.facture_id) {
+                scannedData = qrData;
+                document.getElementById('paymentInfo').style.display = 'block';
+                document.getElementById('factureNumero').textContent = qrData.numero;
+                document.getElementById('factureTotal').textContent = Number(qrData.total).toLocaleString() + ' FCFA';
+                document.getElementById('factureTable').textContent = qrData.table || 'N/A';
+                showMessage('✅ QR Code chargé depuis l\'URL', 'success');
+                debug('QR Code chargé avec succès');
+            } else {
+                debug('Échec du chargement du QR Code depuis l\'URL');
+            }
+        }
+    </script>
+</body>
+</html>

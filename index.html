@@ -48,44 +48,10 @@
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            flex-wrap: wrap;
-            gap: 8px;
         }
         .header h1 { font-size: 16px; font-weight: 600; }
         .header .time { font-size: 13px; opacity: 0.8; }
         .header .badge { background: #e94560; padding: 3px 10px; border-radius: 20px; font-size: 11px; }
-        .header .caissier-info { 
-            font-size: 12px; 
-            background: rgba(255,255,255,0.15); 
-            padding: 4px 12px; 
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .header .caissier-info .avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #e94560;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-            color: white;
-        }
-        .btn-logout { 
-            background: rgba(233,69,96,0.3); 
-            color: #e94560; 
-            padding: 4px 14px; 
-            border-radius: 20px; 
-            font-size: 12px; 
-            border: 1px solid rgba(233,69,96,0.3);
-            cursor: pointer; 
-            transition: all 0.3s;
-        }
-        .btn-logout:hover { background: #e94560; color: white; }
         .main-app { display: flex; height: calc(100vh - 95px); }
         .sidebar {
             width: 200px;
@@ -151,10 +117,17 @@
         }
         .btn:active { transform: scale(0.95); }
         .btn-primary { background: #4a90d9; color: white; }
+        .btn-primary:hover { background: #357abd; }
         .btn-success { background: #27ae60; color: white; }
+        .btn-success:hover { background: #219a52; }
         .btn-danger { background: #e74c3c; color: white; }
+        .btn-danger:hover { background: #c0392b; }
         .btn-warning { background: #f39c12; color: white; }
+        .btn-warning:hover { background: #d68910; }
+        .btn-info { background: #3498db; color: white; }
+        .btn-info:hover { background: #2980b9; }
         .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-xs { padding: 4px 8px; font-size: 11px; }
         .products-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -173,12 +146,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
         }
         .product-card:hover {
             border-color: #4a90d9;
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(74,144,217,0.2);
         }
+        .product-card:active { transform: scale(0.95); }
         .product-card .product-image {
             width: 70px;
             height: 70px;
@@ -201,7 +176,7 @@
         .product-card .product-price { color: #e94560; font-weight: 800; font-size: 16px; margin: 2px 0; }
         .product-card .product-category { font-size: 10px; padding: 2px 10px; border-radius: 12px; color: white; display: inline-block; margin-top: 4px; }
         .product-card .product-stock { font-size: 10px; color: #888; margin-top: 4px; }
-        .product-card .product-actions { margin-top: 8px; display: flex; gap: 6px; justify-content: center; }
+        .product-card .product-actions { margin-top: 8px; display: flex; gap: 6px; justify-content: center; cursor: default; }
         .pos-layout { display: flex; gap: 16px; height: 100%; }
         .pos-products { flex: 1; min-width: 0; }
         .pos-cart { width: 420px; min-width: 340px; display: flex; flex-direction: column; }
@@ -257,19 +232,10 @@
         .stat-card .stat-number { font-size: 28px; font-weight: 800; color: #1a1a2e; }
         .stat-card .stat-label { font-size: 12px; color: #888; margin-top: 4px; }
         .stat-card .stat-icon { font-size: 30px; margin-bottom: 6px; }
-        .stat-card .stat-benefice { color: #27ae60; }
-        .stat-card .stat-perte { color: #e74c3c; }
-        .stat-card .stat-caissier { 
-            background: linear-gradient(135deg, #e94560, #ff6b6b);
-            color: white;
-            border-left-color: #e94560;
-        }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         table th { background: #1a1a2e; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
         table td { padding: 8px 12px; border-bottom: 1px solid #e0e0e0; }
         table tr:hover td { background: #f0f7ff; }
-        .badge-qte { background: #4a90d9; color: white; padding: 2px 10px; border-radius: 12px; }
-        .badge-ca { background: #27ae60; color: white; padding: 2px 10px; border-radius: 12px; }
         .toast {
             position: fixed;
             bottom: 20px;
@@ -333,40 +299,6 @@
         .file-input-wrapper .file-label:hover { border-color: #4a90d9; background: #f0f7ff; }
         .file-input-wrapper .file-label .file-name { font-weight: 600; color: #1a1a2e; }
         .image-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 8px auto; display: block; background: #f0f0f0; }
-        .stat-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-        .stat-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
-        .stat-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-        .welcome-card {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            color: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-        .welcome-card h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-        .welcome-card p { opacity: 0.8; font-size: 14px; }
-        .welcome-card .highlight { color: #e94560; }
-        .welcome-card .stats-mini {
-            display: flex;
-            gap: 20px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .welcome-card .stats-mini .item {
-            background: rgba(255,255,255,0.1);
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .welcome-card .stats-mini .item .number {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2ecc71;
-        }
-        .welcome-card .stats-mini .item .label {
-            font-size: 11px;
-            opacity: 0.7;
-        }
         @media (max-width: 1024px) { .products-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) {
             .sidebar { width: 140px; min-width: 140px; }
@@ -376,11 +308,6 @@
             .products-grid { grid-template-columns: repeat(2, 1fr); }
             .pos-layout { flex-direction: column; }
             .pos-cart { width: 100%; min-width: unset; }
-            .welcome-card h2 { font-size: 18px; }
-            .welcome-card .stats-mini { gap: 10px; }
-            .stat-grid-3 { grid-template-columns: repeat(2, 1fr); }
-            .stat-grid-4 { grid-template-columns: repeat(2, 1fr); }
-            .stat-grid-2 { grid-template-columns: 1fr; }
         }
         @media (max-width: 480px) {
             .products-grid { grid-template-columns: repeat(2, 1fr); }
@@ -397,7 +324,7 @@
             <span class="brand-slogan">| INFORMATIQUE - GESTION - FORMATION</span>
         </div>
         <div class="brand-right">
-            <span class="version">v3.5 POS</span>
+            <span class="version">v3.0 POS</span>
             <span class="phone">📞 +221 77 123 45 67</span>
             <span>🏢 Dakar, Sénégal</span>
         </div>
@@ -405,14 +332,9 @@
 
     <div class="header">
         <h1>🍽️ RestauManager POS</h1>
-        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div>
             <span class="time" id="currentTime"></span>
             <span class="badge" id="orderCount">0 commande</span>
-            <span class="caissier-info" id="caissierInfo">
-                <span class="avatar" id="caissierAvatar">C</span>
-                <span id="caissierName">Non connecté</span>
-            </span>
-            <button class="btn-logout" onclick="logout()" id="logoutBtn" style="display:none;">🚪 Déconnexion</button>
         </div>
     </div>
 
@@ -434,12 +356,6 @@
                 <div class="nav-item" onclick="showPage('produits', this)"><span class="icon">🍕</span> Produits & Menu</div>
                 <div class="nav-item" onclick="showPage('clients', this)"><span class="icon">👥</span> Clients</div>
                 <div class="nav-item" onclick="showPage('financier', this)"><span class="icon">💰</span> État financier</div>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-label">Rapports</div>
-                <div class="nav-item" onclick="window.location.href='/stats_caissiers.html'">
-                    <span class="icon">📊</span> Stats Caissiers
-                </div>
             </div>
         </div>
 
@@ -478,38 +394,15 @@
 
             <!-- Page Dashboard -->
             <div class="page" id="page-dashboard">
-                <!-- Welcome Card avec info caissier -->
-                <div class="welcome-card" id="welcomeCard">
-                    <h2>👋 Bonjour, <span id="welcomeName">Caissier</span> !</h2>
-                    <p>Bienvenue sur votre espace de travail. Voici votre récapitulatif du jour.</p>
-                    <div class="stats-mini" id="caissierMiniStats">
-                        <div class="item"><div class="number" id="miniVentes">0</div><div class="label">Ventes</div></div>
-                        <div class="item"><div class="number" id="miniMontant">0 FCFA</div><div class="label">Montant encaissé</div></div>
-                        <div class="item"><div class="number" id="miniSessions">0</div><div class="label">Sessions</div></div>
-                        <div class="item"><div class="number" id="miniSessionStatus">❌ Fermée</div><div class="label">Session</div></div>
-                    </div>
-                </div>
-
+                <h2 style="margin-bottom:16px;">📊 Tableau de bord</h2>
                 <div class="stats-grid" id="dashboardStats"></div>
-                
-                <div class="card" id="beneficeCard" style="display:none;">
-                    <div class="card-title">💰 Bénéfice du jour</div>
-                    <div class="stat-grid-3" id="beneficeStats"></div>
-                </div>
-                
-                <div class="card" id="topQteCard" style="display:none;">
+                <div class="card">
                     <div class="card-title">🏆 Top produits par quantité</div>
                     <div id="topProduitsQte"></div>
                 </div>
-                
-                <div class="card" id="topCaCard" style="display:none;">
+                <div class="card">
                     <div class="card-title">💰 Top produits par chiffre d'affaires</div>
                     <div id="topProduitsCa"></div>
-                </div>
-                
-                <div class="card" id="caissiersCard" style="display:none;">
-                    <div class="card-title">👥 Performance des caissiers</div>
-                    <div id="caissiersStats"></div>
                 </div>
             </div>
 
@@ -524,7 +417,7 @@
             <div class="page" id="page-reservations">
                 <h2 style="margin-bottom:16px;">📅 Réservations</h2>
                 <div class="card">
-                    <div class="card-title"><span>Réservations</span><button class="btn btn-primary btn-sm" onclick="openReservationModal()">➕ Nouvelle</button></div>
+                    <div class="card-title"><span>Réservations du jour</span><button class="btn btn-primary btn-sm" onclick="openReservationModal()">➕ Nouvelle</button></div>
                     <div id="reservationsList"></div>
                 </div>
             </div>
@@ -532,7 +425,10 @@
             <!-- Page Factures -->
             <div class="page" id="page-factures">
                 <h2 style="margin-bottom:16px;">🧾 Factures</h2>
-                <div class="card"><div class="card-title">Historique des factures</div><div id="facturesList"></div></div>
+                <div class="card">
+                    <div class="card-title">Historique des factures</div>
+                    <div id="facturesList"></div>
+                </div>
             </div>
 
             <!-- Page Produits -->
@@ -593,8 +489,7 @@
             clients: [],
             tables: [],
             reservations: [],
-            factures: [],
-            caissier: null
+            factures: []
         };
 
         let editingProductId = null;
@@ -639,61 +534,8 @@
             }
         }
 
-        // ==================== AUTHENTIFICATION ====================
-        function checkAuth() {
-            const caissierStr = localStorage.getItem('caissier');
-            if (caissierStr) {
-                try {
-                    state.caissier = JSON.parse(caissierStr);
-                    const initial = state.caissier.prenom.charAt(0);
-                    document.getElementById('caissierAvatar').textContent = initial;
-                    document.getElementById('caissierName').textContent = state.caissier.prenom + ' ' + state.caissier.nom;
-                    document.getElementById('welcomeName').textContent = state.caissier.prenom + ' ' + state.caissier.nom;
-                    document.getElementById('logoutBtn').style.display = 'inline-block';
-                    loadCaissierStats();
-                    return true;
-                } catch (e) {
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        async function loadCaissierStats() {
-            if (!state.caissier) return;
-            try {
-                const stats = await apiCall(`/api/caissiers/${state.caissier.id}/stats?debut=${new Date().toISOString().split('T')[0]}&fin=${new Date().toISOString().split('T')[0]}`);
-                if (stats.success) {
-                    const data = stats.data;
-                    document.getElementById('miniVentes').textContent = data.nb_ventes || 0;
-                    document.getElementById('miniMontant').textContent = Number(data.montant_encaisse || 0).toLocaleString() + ' FCFA';
-                    
-                    // Vérifier la session
-                    const sessionRes = await apiCall(`/api/caissiers/${state.caissier.id}/sessions`);
-                    if (sessionRes.success && sessionRes.data.length > 0) {
-                        const lastSession = sessionRes.data[0];
-                        document.getElementById('miniSessions').textContent = sessionRes.data.length;
-                        document.getElementById('miniSessionStatus').textContent = lastSession.statut === 'ouverte' ? '✅ Ouverte' : '❌ Fermée';
-                        document.getElementById('miniSessionStatus').style.color = lastSession.statut === 'ouverte' ? '#2ecc71' : '#e74c3c';
-                    }
-                }
-            } catch (e) {
-                console.error('Erreur chargement stats caissier:', e);
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('caissier');
-            state.caissier = null;
-            window.location.href = '/login.html';
-        }
-
         // ==================== NAVIGATION ====================
         function showPage(page, el) {
-            if (!checkAuth()) {
-                window.location.href = '/login.html';
-                return;
-            }
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + page).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -902,16 +744,9 @@
         }
 
         async function posNewOrder() {
-            if (!state.caissier) {
-                showToast('Veuillez vous connecter', 'error');
-                return false;
-            }
             const res = await apiCall('/api/factures', {
                 method: 'POST',
-                body: JSON.stringify({ 
-                    table_id: state.currentTable, 
-                    utilisateur_id: state.caissier.id
-                })
+                body: JSON.stringify({ table_id: state.currentTable, utilisateur_id: 1 })
             });
             if (res.success) {
                 state.currentFactureId = res.data.id;
@@ -942,103 +777,66 @@
                 showToast('✅ Paiement effectué !', 'success');
                 await posNewOrder();
                 posLoadProducts();
-                loadCaissierStats();
             }
         }
 
         // ==================== DASHBOARD ====================
         async function loadDashboard() {
-            try {
-                const res = await apiCall('/api/dashboard');
-                if (res.success) {
-                    const s = res.data;
-                    
-                    document.getElementById('dashboardStats').innerHTML = `
-                        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-number">${Number(s.chiffre_affaires_jour).toLocaleString()} FCFA</div><div class="stat-label">CA du jour</div></div>
-                        <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-number">${s.commandes_jour}</div><div class="stat-label">Commandes du jour</div></div>
-                        <div class="stat-card"><div class="stat-icon">🪑</div><div class="stat-number">${s.tables_occupees}/${s.tables_total}</div><div class="stat-label">Tables occupées</div></div>
-                        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-number">${s.reservations_aujourd_hui}</div><div class="stat-label">Réservations</div></div>
-                        <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-number">${Number(s.ca_semaine).toLocaleString()} FCFA</div><div class="stat-label">CA cette semaine</div></div>
-                        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-number">${Number(s.ca_mois).toLocaleString()} FCFA</div><div class="stat-label">CA ce mois</div></div>
+            const res = await apiCall('/api/dashboard');
+            if (res.success) {
+                const s = res.data;
+                document.getElementById('dashboardStats').innerHTML = `
+                    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-number">${Number(s.chiffre_affaires_jour).toLocaleString()} FCFA</div><div class="stat-label">CA du jour</div></div>
+                    <div class="stat-card"><div class="stat-icon">🧾</div><div class="stat-number">${s.commandes_jour}</div><div class="stat-label">Commandes du jour</div></div>
+                    <div class="stat-card"><div class="stat-icon">🪑</div><div class="stat-number">${s.tables_occupees}/${s.tables_total}</div><div class="stat-label">Tables occupées</div></div>
+                    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-number">${s.reservations_aujourd_hui}</div><div class="stat-label">Réservations</div></div>
+                    <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-number">${Number(s.ca_semaine).toLocaleString()} FCFA</div><div class="stat-label">CA cette semaine</div></div>
+                    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-number">${Number(s.ca_mois).toLocaleString()} FCFA</div><div class="stat-label">CA ce mois</div></div>
+                `;
+
+                const topQte = s.top_produits_qte || [];
+                if (topQte.length > 0) {
+                    document.getElementById('topProduitsQte').innerHTML = `
+                        <table>
+                            <thead><tr><th>#</th><th>Produit</th><th>Code</th><th style="text-align:center;">Quantité</th><th style="text-align:right;">CA</th></tr></thead>
+                            <tbody>
+                                ${topQte.map((p, i) => `
+                                    <tr>
+                                        <td>${i + 1}</td>
+                                        <td><strong>${p.nom}</strong></td>
+                                        <td><small>${p.code}</small></td>
+                                        <td style="text-align:center;"><span style="background:#4a90d9;color:white;padding:2px 10px;border-radius:12px;">${p.qte}</span></td>
+                                        <td style="text-align:right;font-weight:600;color:#e94560;">${Number(p.ca).toLocaleString()} FCFA</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
                     `;
-                    
-                    if (s.benefice) {
-                        document.getElementById('beneficeCard').style.display = 'block';
-                        const b = s.benefice;
-                        document.getElementById('beneficeStats').innerHTML = `
-                            <div class="stat-card"><div class="stat-number ${b.benefice >= 0 ? 'stat-benefice' : 'stat-perte'}">${Number(b.ca_total).toLocaleString()} FCFA</div><div class="stat-label">CA total</div></div>
-                            <div class="stat-card"><div class="stat-number">${Number(b.cout_total).toLocaleString()} FCFA</div><div class="stat-label">Coût total</div></div>
-                            <div class="stat-card"><div class="stat-number ${b.benefice >= 0 ? 'stat-benefice' : 'stat-perte'}">${Number(b.benefice).toLocaleString()} FCFA (${b.marge}%)</div><div class="stat-label">${b.benefice >= 0 ? '✅ Bénéfice' : '❌ Perte'}</div></div>
-                        `;
-                    }
-                    
-                    if (s.top_produits_qte && s.top_produits_qte.length > 0) {
-                        document.getElementById('topQteCard').style.display = 'block';
-                        document.getElementById('topProduitsQte').innerHTML = `
-                            <table>
-                                <thead><tr><th>#</th><th>Produit</th><th>Code</th><th style="text-align:center;">Quantité</th><th style="text-align:right;">CA</th></tr></thead>
-                                <tbody>
-                                    ${s.top_produits_qte.map((p, i) => `
-                                        <tr>
-                                            <td>${i + 1}</td>
-                                            <td><strong>${p.nom}</strong></td>
-                                            <td><small>${p.code}</small></td>
-                                            <td style="text-align:center;"><span class="badge-qte">${p.qte}</span></td>
-                                            <td style="text-align:right;font-weight:600;color:#e94560;">${Number(p.ca).toLocaleString()} FCFA</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        `;
-                    }
-                    
-                    if (s.top_produits_ca && s.top_produits_ca.length > 0) {
-                        document.getElementById('topCaCard').style.display = 'block';
-                        document.getElementById('topProduitsCa').innerHTML = `
-                            <table>
-                                <thead><tr><th>#</th><th>Produit</th><th>Code</th><th style="text-align:center;">Quantité</th><th style="text-align:right;">CA</th></tr></thead>
-                                <tbody>
-                                    ${s.top_produits_ca.map((p, i) => `
-                                        <tr>
-                                            <td>${i + 1}</td>
-                                            <td><strong>${p.nom}</strong></td>
-                                            <td><small>${p.code}</small></td>
-                                            <td style="text-align:center;"><span class="badge-ca">${p.qte}</span></td>
-                                            <td style="text-align:right;font-weight:700;color:#27ae60;font-size:15px;">${Number(p.ca).toLocaleString()} FCFA</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        `;
-                    }
-                    
-                    if (s.caissiers && s.caissiers.length > 0) {
-                        document.getElementById('caissiersCard').style.display = 'block';
-                        const hasData = s.caissiers.some(c => c.nb_ventes > 0 || c.montant_encaisse > 0);
-                        if (hasData) {
-                            document.getElementById('caissiersStats').innerHTML = `
-                                <table>
-                                    <thead><tr><th>Caissier</th><th>Ventes</th><th>Montant encaissé</th><th>Sessions</th><th>Session ouverte</th></tr></thead>
-                                    <tbody>
-                                        ${s.caissiers.filter(c => c.nb_ventes > 0 || c.montant_encaisse > 0 || c.session_ouverte > 0).map(c => `
-                                            <tr ${c.id == state.caissier?.id ? 'style="background:#f0f7ff;"' : ''}>
-                                                <td><strong>${c.prenom} ${c.nom}</strong> ${c.id == state.caissier?.id ? '⭐' : ''}</td>
-                                                <td>${c.nb_ventes}</td>
-                                                <td style="font-weight:600;color:#27ae60;">${Number(c.montant_encaisse).toLocaleString()} FCFA</td>
-                                                <td>${c.nb_sessions}</td>
-                                                <td>${c.session_ouverte > 0 ? '✅ Ouverte' : '❌ Fermée'}</td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            `;
-                        } else {
-                            document.getElementById('caissiersStats').innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Aucune vente enregistrée aujourd\'hui</div>';
-                        }
-                    }
+                } else {
+                    document.getElementById('topProduitsQte').innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Aucune donnée disponible</div>';
                 }
-            } catch (e) {
-                console.error('Error loading dashboard:', e);
+
+                const topCa = s.top_produits_ca || [];
+                if (topCa.length > 0) {
+                    document.getElementById('topProduitsCa').innerHTML = `
+                        <table>
+                            <thead><tr><th>#</th><th>Produit</th><th>Code</th><th style="text-align:center;">Quantité</th><th style="text-align:right;">CA</th></tr></thead>
+                            <tbody>
+                                ${topCa.map((p, i) => `
+                                    <tr>
+                                        <td>${i + 1}</td>
+                                        <td><strong>${p.nom}</strong></td>
+                                        <td><small>${p.code}</small></td>
+                                        <td style="text-align:center;"><span style="background:#f39c12;color:white;padding:2px 10px;border-radius:12px;">${p.qte}</span></td>
+                                        <td style="text-align:right;font-weight:700;color:#27ae60;font-size:15px;">${Number(p.ca).toLocaleString()} FCFA</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    document.getElementById('topProduitsCa').innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Aucune donnée disponible</div>';
+                }
             }
         }
 
@@ -1135,11 +933,29 @@
             if (res.success) {
                 state.factures = res.data;
                 document.getElementById('facturesList').innerHTML = state.factures.length ?
-                    `<table><thead><tr><th>N°</th><th>Table</th><th>Total</th><th>Statut</th><th>Date</th></tr></thead><tbody>
-                    ${state.factures.map(f => `<tr><td><strong>${f.numero}</strong></td><td>${f.table_num || 'N/A'}</td><td>${Number(f.total).toLocaleString()} FCFA</td><td><span style="padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${f.statut === 'payée' ? '#27ae60' : '#f39c12'};color:white;">${f.statut}</span></td><td>${f.created_at ? f.created_at.split(' ')[0] : ''}</td></tr>`).join('')}
+                    `<table><thead><tr><th>N°</th><th>Table</th><th>Total</th><th>Statut</th><th>Date</th><th>Action</th></tr></thead><tbody>
+                    ${state.factures.map(f => `<tr>
+                        <td><strong>${f.numero}</strong></td>
+                        <td>${f.table_num || 'N/A'}</td>
+                        <td>${Number(f.total).toLocaleString()} FCFA</td>
+                        <td><span style="padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${f.statut === 'payée' ? '#27ae60' : '#f39c12'};color:white;">${f.statut}</span></td>
+                        <td>${f.created_at ? f.created_at.split(' ')[0] : ''}</td>
+                        <td>
+                            <button class="btn btn-info btn-xs" onclick="genererQRCode(${f.id})">📱 QR</button>
+                        </td>
+                    </tr>`).join('')}
                     </tbody></table>` :
                     '<div style="text-align:center;padding:20px;color:#999;">Aucune facture</div>';
             }
+        }
+
+        // ==================== FONCTION QR CODE ====================
+        function genererQRCode(factureId) {
+            if (!factureId) {
+                showToast('ID de facture non spécifié', 'error');
+                return;
+            }
+            window.open(`/ticket.html?id=${factureId}`, '_blank');
         }
 
         // ==================== CLIENTS ====================
@@ -1266,11 +1082,12 @@
                             </div>
                             <input type="file" id="imageFile" accept="image/*" onchange="previewImage(this)">
                         </div>
-                        <small style="color:#888;">Formats: JPG, PNG, GIF</small>
+                        <small style="color:#888;">Formats: JPG, PNG, GIF - Laissez vide pour garder l'image actuelle</small>
                     </div>
                     <div class="form-group">
                         <label>Nom ${isEdit ? '(optionnel)' : '*'}</label>
                         <input type="text" id="prodNom" value="${data.nom || ''}">
+                        ${isEdit ? '<small style="color:#888;">Laissez vide pour ne pas modifier</small>' : ''}
                     </div>
                     <div class="form-group">
                         <label>Description</label>
@@ -1280,6 +1097,7 @@
                         <div class="form-group">
                             <label>Prix ${isEdit ? '(optionnel)' : '*'}</label>
                             <input type="number" id="prodPrix" value="${data.prix || ''}" step="0.01">
+                            ${isEdit ? '<small style="color:#888;">Laissez vide pour ne pas modifier</small>' : ''}
                         </div>
                         <div class="form-group">
                             <label>Prix achat</label>
@@ -1301,7 +1119,7 @@
                         <input type="text" id="prodUnite" value="${data.unite || 'portion'}">
                     </div>
                     <input type="hidden" id="prodImageUrl" value="${imageUrl}">
-                    <button class="btn btn-success" onclick="saveProduct()" style="width:100%; padding:12px; font-size:16px; margin-top:8px;">
+                    <button class="btn btn-success" id="saveProductBtn" style="width:100%; padding:12px; font-size:16px; margin-top:8px;">
                         ✅ ${isEdit ? 'Mettre à jour' : 'Créer'} le produit
                     </button>
                 </div>
@@ -1320,6 +1138,16 @@
                     }
                 }
             });
+
+            setTimeout(function() {
+                const btn = document.getElementById('saveProductBtn');
+                if (btn) {
+                    btn.onclick = function(e) {
+                        e.preventDefault();
+                        saveProduct();
+                    };
+                }
+            }, 200);
         }
 
         function previewImage(input) {
@@ -1340,8 +1168,10 @@
         function saveProduct() {
             const id = editingProductId;
             const isEdit = !!id;
+
             const nomInput = document.getElementById('prodNom');
             const prixInput = document.getElementById('prodPrix');
+
             const formData = new FormData();
 
             if (isEdit) {
@@ -1361,15 +1191,30 @@
             }
 
             const desc = document.getElementById('prodDesc');
-            if (desc && desc.value) formData.append('description', desc.value);
+            if (desc && desc.value) {
+                formData.append('description', desc.value);
+            }
+
             const achat = document.getElementById('prodAchat');
-            if (achat && achat.value) formData.append('prix_achat', parseFloat(achat.value));
+            if (achat && achat.value) {
+                formData.append('prix_achat', parseFloat(achat.value));
+            }
+
             const categorie = document.getElementById('prodCategorie');
-            if (categorie && categorie.value) formData.append('categorie_id', categorie.value);
+            if (categorie && categorie.value) {
+                formData.append('categorie_id', categorie.value);
+            }
+
             const stock = document.getElementById('prodStock');
-            if (stock && stock.value) formData.append('stock', parseInt(stock.value));
+            if (stock && stock.value) {
+                formData.append('stock', parseInt(stock.value));
+            }
+
             const unite = document.getElementById('prodUnite');
-            if (unite && unite.value) formData.append('unite', unite.value);
+            if (unite && unite.value) {
+                formData.append('unite', unite.value);
+            }
+
             const fileInput = document.getElementById('imageFile');
             if (fileInput && fileInput.files && fileInput.files[0]) {
                 formData.append('image', fileInput.files[0]);
@@ -1379,6 +1224,7 @@
                     formData.append('image_url', imageUrlInput.value);
                 }
             }
+
             formData.append('disponible', 1);
 
             if (isEdit && formData.keys().next().done) {
@@ -1389,22 +1235,25 @@
             const url = id ? `/api/produits/${id}` : '/api/produits';
             const method = id ? 'PUT' : 'POST';
 
-            fetch(url, { method, body: formData })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast(id ? '✅ Produit modifié !' : '✅ Produit créé !', 'success');
-                        closeModal();
-                        loadProduits();
-                        posLoadProducts();
-                    } else {
-                        showToast('❌ Erreur: ' + (data.error || 'Inconnue'), 'error');
-                    }
-                })
-                .catch(e => {
-                    console.error('Erreur:', e);
-                    showToast('❌ Erreur: ' + e.message, 'error');
-                });
+            fetch(url, {
+                method: method,
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(id ? '✅ Produit modifié !' : '✅ Produit créé !', 'success');
+                    closeModal();
+                    loadProduits();
+                    posLoadProducts();
+                } else {
+                    showToast('❌ Erreur: ' + (data.error || 'Inconnue'), 'error');
+                }
+            })
+            .catch(e => {
+                console.error('Erreur:', e);
+                showToast('❌ Erreur: ' + e.message, 'error');
+            });
         }
 
         function editProduct(id) {
@@ -1446,50 +1295,29 @@
                         <div class="stat-card"><div class="stat-number">${Number(d.revenus.tva || 0).toLocaleString()} FCFA</div><div class="stat-label">TVA</div></div>
                         <div class="stat-card"><div class="stat-number">${d.revenus.nb_factures || 0}</div><div class="stat-label">Factures</div></div>
                     </div>
-                    
                     ${d.par_mode && d.par_mode.length ? `
                     <div class="card"><div class="card-title">💰 Par mode de paiement</div>
                     <table><thead><tr><th>Mode</th><th>Nombre</th><th>Montant</th></tr></thead><tbody>
                     ${d.par_mode.map(m => `<tr><td>${m.mode_paiement}</td><td>${m.nb}</td><td>${Number(m.montant).toLocaleString()} FCFA</td></tr>`).join('')}
                     </tbody></table></div>` : ''}
-                    
-                    ${d.benefice ? `
-                    <div class="card"><div class="card-title">💰 Bénéfice</div>
-                    <div class="stat-grid-3">
-                        <div class="stat-card"><div class="stat-number stat-benefice">${Number(d.benefice.ca_total).toLocaleString()} FCFA</div><div class="stat-label">CA total</div></div>
-                        <div class="stat-card"><div class="stat-number">${Number(d.benefice.cout_total).toLocaleString()} FCFA</div><div class="stat-label">Coût total</div></div>
-                        <div class="stat-card"><div class="stat-number ${d.benefice.benefice >= 0 ? 'stat-benefice' : 'stat-perte'}">${Number(d.benefice.benefice).toLocaleString()} FCFA (${d.benefice.marge}%)</div><div class="stat-label">${d.benefice.benefice >= 0 ? '✅ Bénéfice' : '❌ Perte'}</div></div>
-                    </div>
-                    </div>` : ''}
-                    
-                    ${d.top_produits_qte && d.top_produits_qte.length ? `
                     <div class="card"><div class="card-title">🏆 Top produits par quantité</div>
-                    <table><thead><tr><th>Produit</th><th>Code</th><th style="text-align:center;">Quantité</th><th style="text-align:right;">CA</th></tr></thead><tbody>
-                    ${d.top_produits_qte.map(p => `<tr><td><strong>${p.nom}</strong></td><td>${p.code}</td><td style="text-align:center;"><span class="badge-qte">${p.qte}</span></td><td style="text-align:right;color:#e94560;font-weight:600;">${Number(p.ca).toLocaleString()} FCFA</td></tr>`).join('')}
-                    </tbody></table></div>` : ''}
-                    
-                    ${d.top_produits_ca && d.top_produits_ca.length ? `
+                    ${d.top_produits_qte && d.top_produits_qte.length ? `
+                    <table><thead><tr><th>Produit</th><th>Code</th><th>Quantité</th><th>CA</th></tr></thead><tbody>
+                    ${d.top_produits_qte.map(p => `<tr><td>${p.nom}</td><td>${p.code}</td><td>${p.qte}</td><td>${Number(p.ca).toLocaleString()} FCFA</td></tr>`).join('')}
+                    </tbody></table>` : '<div style="text-align:center;padding:20px;color:#999;">Aucune donnée</div>'}
+                    </div>
                     <div class="card"><div class="card-title">💰 Top produits par chiffre d'affaires</div>
-                    <table><thead><tr><th>Produit</th><th>Code</th><th style="text-align:center;">Quantité</th><th style="text-align:right;">CA</th></tr></thead><tbody>
-                    ${d.top_produits_ca.map(p => `<tr><td><strong>${p.nom}</strong></td><td>${p.code}</td><td style="text-align:center;"><span class="badge-ca">${p.qte}</span></td><td style="text-align:right;font-weight:700;color:#27ae60;">${Number(p.ca).toLocaleString()} FCFA</td></tr>`).join('')}
-                    </tbody></table></div>` : ''}
-                    
-                    ${d.par_categorie && d.par_categorie.length ? `
-                    <div class="card"><div class="card-title">📊 Ventes par catégorie</div>
-                    <table><thead><tr><th>Catégorie</th><th style="text-align:center;">Quantité</th><th style="text-align:right;">CA</th></tr></thead><tbody>
-                    ${d.par_categorie.map(c => `<tr><td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${c.couleur};margin-right:8px;"></span>${c.categorie}</td><td style="text-align:center;">${c.qte}</td><td style="text-align:right;font-weight:600;">${Number(c.ca).toLocaleString()} FCFA</td></tr>`).join('')}
-                    </tbody></table></div>` : ''}
+                    ${d.top_produits_ca && d.top_produits_ca.length ? `
+                    <table><thead><tr><th>Produit</th><th>Code</th><th>Quantité</th><th>CA</th></tr></thead><tbody>
+                    ${d.top_produits_ca.map(p => `<tr><td>${p.nom}</td><td>${p.code}</td><td>${p.qte}</td><td>${Number(p.ca).toLocaleString()} FCFA</td></tr>`).join('')}
+                    </tbody></table>` : '<div style="text-align:center;padding:20px;color:#999;">Aucune donnée</div>'}
+                    </div>
                 `;
             }
         }
 
         // ==================== INIT ====================
         document.addEventListener('DOMContentLoaded', function() {
-            if (!checkAuth()) {
-                window.location.href = '/login.html';
-                return;
-            }
-
             function updateClock() {
                 document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('fr-FR');
             }
